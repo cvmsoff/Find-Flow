@@ -35,12 +35,15 @@ FindFlow.carte = (function creerCarte() {
        ne jamais laisser l'utilisateur devant une carte vide.
      On peut la rappeler après que l'utilisateur a collé sa clé, sans recharger
      la page : on retire l'ancien fond et on met le nouveau. */
-  /* Réglages communs aux tuiles pour un zoom fluide, SANS flash noir :
-     - keepBuffer garde plus de tuiles autour de l'écran, prêtes à l'affichage ;
-     - updateWhenZooming évite de recharger pendant le geste de zoom (on met à
-       jour une fois le zoom fini), ce qui supprime le clignotement. */
+  /* Réglages communs aux tuiles :
+     - maxZoom 22 + maxNativeZoom 20 : on peut zoomer PLUS profond que ce que le
+       fournisseur fabrique (Leaflet agrandit les dernières tuiles), pour
+       s'approcher comme sur Google au lieu de buter trop tôt ;
+     - keepBuffer garde des tuiles autour de l'écran, prêtes à l'affichage ;
+     - updateWhenZooming évite de recharger pendant le geste de zoom (mise à jour
+       une fois le zoom fini), ce qui supprime le flash. */
   function optionsTuiles() {
-    return { maxZoom: 19, keepBuffer: 6, updateWhenZooming: false };
+    return { maxZoom: 22, maxNativeZoom: 20, keepBuffer: 6, updateWhenZooming: false };
   }
 
   let coucheFond = null;
@@ -52,12 +55,12 @@ FindFlow.carte = (function creerCarte() {
     const cle = (reglages.cleCarte || '').trim();
     if (cle) {
       /* Deux styles MapTiler selon le réglage :
-         - 'satellite' -> style « hybrid » : l'image réelle AVEC les noms de rues,
-           l'équivalent gratuit de la vue satellite de Google, utile pour
-           reconnaître un lieu précis ;
-         - sinon -> 'openstreetmap' : le plan classique.
+         - 'satellite' -> style « hybrid » : l'image réelle AVEC les noms de rues ;
+         - sinon -> 'streets-v2' : le plan qui affiche le PLUS de points d'intérêt
+           (commerces, lieux) parmi les styles MapTiler — plus que le style OSM
+           brut, même si ça n'atteint pas la densité de Google.
          La clé voyage dans l'adresse de la tuile ; elle vient des réglages. */
-      const style = reglages.styleCarte === 'satellite' ? 'hybrid' : 'openstreetmap';
+      const style = reglages.styleCarte === 'satellite' ? 'hybrid' : 'streets-v2';
       coucheFond = L.tileLayer(
         'https://api.maptiler.com/maps/' + style + '/{z}/{x}/{y}.jpg?key=' + encodeURIComponent(cle),
         Object.assign({ attribution: '© OpenStreetMap contributors, © MapTiler' }, optionsTuiles()));
