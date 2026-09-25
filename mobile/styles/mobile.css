@@ -1,0 +1,137 @@
+/* Écran mobile de Find-Flow — carte plein écran + feuille qui remonte du bas
+   (bottom sheet) + barre d'onglets, façon Life360 / Find my kids.
+   Réutilise les jetons de couleur du bureau (01-base.css) : même identité. */
+
+html, body { height: 100%; overflow: hidden; }
+#carte { position: fixed; inset: 0; z-index: 0; background: #e8eaed; }
+.bandeau-hors-ligne {
+  position: fixed; top: calc(env(safe-area-inset-top) + 66px); left: 50%; transform: translateX(-50%);
+  z-index: 30; background: #fff7ed; color: var(--warn); border: 1px solid #f2c88a;
+  border-radius: 999px; padding: 7px 14px; font-size: 12.5px; box-shadow: var(--ombre-douce); max-width: 92%;
+}
+
+/* Écran de démarrage */
+#splash { position: fixed; inset: 0; z-index: 2000; background: var(--surface);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity .4s; }
+#splash[hidden] { display: none; }
+#splash.ferme { opacity: 0; }
+.splash-app { display: flex; align-items: center; gap: 10px; }
+.splash-pastille { width: 34px; height: 34px; border-radius: 10px; background: linear-gradient(135deg, var(--brand), #34d17f); }
+.splash-nom { font-size: 32px; font-weight: 800; }
+.splash-par { position: absolute; bottom: 40px; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.splash-par span { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+.splash-par img { height: 22px; }
+:root[data-theme="dark"] .splash-par img { filter: brightness(0) invert(1); opacity: .9; }
+
+/* Barre du haut */
+.topbar-m {
+  position: fixed; top: calc(env(safe-area-inset-top) + 10px); left: 12px; right: 12px; z-index: 20;
+  display: flex; align-items: center; gap: 8px;
+  background: var(--verre); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border); border-radius: 999px; padding: 8px 10px; box-shadow: var(--ombre);
+}
+.marque-m { display: flex; align-items: center; gap: 8px; flex: 1; padding-left: 6px; font-size: 16px; }
+.pastille-m { width: 22px; height: 22px; border-radius: 7px; background: linear-gradient(135deg, var(--brand), #34d17f); }
+.rond-m { width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--border); background: var(--surface);
+  color: var(--text); display: flex; align-items: center; justify-content: center; }
+.rond-m svg { width: 19px; height: 19px; }
+
+/* Feuille du bas (bottom sheet) */
+.feuille {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 25;
+  height: 38vh; background: var(--surface);
+  border-radius: 22px 22px 0 0; box-shadow: 0 -10px 30px rgba(0,0,0,.16);
+  padding: 6px 16px calc(env(safe-area-inset-bottom) + 74px);
+  transition: height .28s ease; overflow: hidden;
+  display: flex; flex-direction: column;
+}
+.feuille.pleine { height: 84vh; }
+.poignee { width: 44px; height: 5px; border-radius: 999px; background: var(--border);
+  margin: 6px auto 10px; flex: 0 0 auto; cursor: grab; touch-action: none; }
+
+.feuille-titre { font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.pastille-compte { font-size: 13px; font-weight: 800; color: #fff; background: var(--brand);
+  border-radius: 999px; padding: 1px 9px; }
+.chips-m { display: flex; gap: 6px; margin: 8px 0 6px; }
+
+.liste-m { overflow-y: auto; flex: 1; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+.liste-m::-webkit-scrollbar { display: none; }
+
+/* Carte d'appareil */
+.carte-m {
+  display: flex; align-items: center; gap: 12px; width: 100%; text-align: left;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+  padding: 10px 12px; margin-bottom: 8px; color: var(--text); box-shadow: var(--ombre-douce);
+}
+.avatar { width: 46px; height: 46px; flex: 0 0 auto; border-radius: 50%; display: flex; align-items: center;
+  justify-content: center; color: #fff; font-weight: 800; font-size: 16px;
+  box-shadow: 0 0 0 3px var(--surface), 0 0 0 6px var(--anneau, #cbd5e1); }
+.carte-m.en-ligne { --anneau: var(--ok); }
+.carte-m.hors-ligne { --anneau: #cbd5e1; }
+.carte-m.vole { --anneau: var(--danger); }
+.avatar-img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+.carte-m-texte { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.carte-m-nom { font-weight: 700; font-size: 15px; }
+.carte-m-sous { font-size: 12.5px; color: var(--muted); }
+.badge-alerte { align-self: flex-start; margin-top: 3px; padding: 2px 9px; background: var(--danger-doux);
+  color: var(--danger); border-radius: 999px; font-size: 12px; font-weight: 800; }
+.carte-m-batt { flex: 0 0 auto; font-size: 12px; font-weight: 800; color: var(--muted);
+  background: var(--surface-2); border-radius: 999px; padding: 4px 8px; }
+
+/* Vue détail dans la feuille */
+.feuille-detail { overflow-y: auto; flex: 1; scrollbar-width: none; }
+.feuille-detail::-webkit-scrollbar { display: none; }
+.retour { border: 0; background: transparent; color: var(--brand-fort); font-weight: 700; font-size: 15px;
+  padding: 4px 0 10px; cursor: pointer; }
+.detail-entete { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.detail-entete .avatar { width: 56px; height: 56px; }
+.detail-nom { font-size: 19px; font-weight: 800; }
+.detail-sous { font-size: 13px; color: var(--muted); }
+.alertes-m { list-style: none; margin: 0 0 12px; padding: 0; }
+.alertes-m li { background: var(--danger-doux); color: var(--danger); font-weight: 800; border-radius: 10px;
+  padding: 8px 12px; margin-bottom: 6px; }
+.dl { display: flex; border-bottom: 1px solid var(--border); padding: 9px 0; }
+.dl .k { width: 42%; color: var(--muted); font-size: 13.5px; }
+.dl .v { flex: 1; font-size: 14.5px; }
+.actions-m { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
+.actions-m .pilule { width: 100%; }
+.bloc-proprio-m { background: var(--surface-2); border-radius: 12px; padding: 10px 12px; margin: 10px 0; }
+.ligne-amoi { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+.ligne-amoi input { width: 18px; height: 18px; accent-color: var(--brand); }
+.route-m { margin-top: 10px; font-size: 13px; color: var(--muted); }
+.route-m a { font-weight: 700; }
+
+/* Barre d'onglets */
+.onglets {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
+  display: flex; background: var(--surface); border-top: 1px solid var(--border);
+  padding: 6px 6px calc(env(safe-area-inset-bottom) + 6px);
+}
+.onglet { flex: 1; border: 0; background: transparent; color: var(--muted); cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 11px; padding: 6px 0; }
+.onglet svg { width: 22px; height: 22px; }
+.onglet.actif { color: var(--brand); }
+
+/* Marqueurs de la carte (avatars ronds + nom), comme au bureau. */
+.marqueur { position: relative; width: 40px; height: 40px; }
+.marqueur-avatar { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center;
+  justify-content: center; color: #fff; font-weight: 800; font-size: 14px;
+  box-shadow: 0 0 0 3px #fff, 0 0 0 6px var(--anneau, #cbd5e1), 0 5px 12px rgba(0,0,0,.28); }
+.marqueur.en-ligne { --anneau: #22c55e; }
+.marqueur.hors-ligne { --anneau: #cbd5e1; }
+.marqueur.vole { --anneau: #ef4444; }
+.marqueur-avatar .avatar-img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+.marqueur-nom { position: absolute; top: 46px; left: 50%; transform: translateX(-50%); background: #fff;
+  color: #14171f; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 999px;
+  box-shadow: 0 3px 8px rgba(0,0,0,.2); white-space: nowrap; }
+
+/* Fenêtre réglages */
+.modale-m { position: fixed; inset: 0; z-index: 60; display: flex; align-items: flex-end; }
+.modale-m[hidden] { display: none; }
+.modale-fond { position: absolute; inset: 0; background: rgba(10,12,20,.5); }
+.modale-boite-m { position: relative; width: 100%; background: var(--surface); border-radius: 22px 22px 0 0;
+  padding: 18px 16px calc(env(safe-area-inset-bottom) + 18px); box-shadow: 0 -10px 40px rgba(0,0,0,.3);
+  max-height: 88vh; overflow-y: auto; }
+.modale-entete { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.fiche-fermer { border: 0; background: transparent; font-size: 26px; color: var(--muted); cursor: pointer; }
+.champ textarea { font-family: "Menlo", "Consolas", monospace; font-size: 12px; resize: vertical; }

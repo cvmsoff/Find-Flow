@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>Find-Flow — Mobile</title>
+  <meta name="author" content="Cams-Lab (Seya Gilles Cames)">
+
+  <script>
+    try { var t = localStorage.getItem('findflow.theme'); if (t === 'dark') document.documentElement.setAttribute('data-theme','dark'); } catch (e) {}
+  </script>
+
+  <!-- On réutilise Leaflet et les jetons de couleur du bureau : même identité. -->
+  <link rel="stylesheet" href="../tableau-de-bord/vendor/leaflet/leaflet.css">
+  <link rel="stylesheet" href="../tableau-de-bord/styles/01-base.css">
+  <link rel="stylesheet" href="styles/mobile.css">
+</head>
+<body>
+
+  <!-- Écran de démarrage (même esprit que le bureau) -->
+  <div id="splash">
+    <div class="splash-app"><span class="splash-pastille"></span><span class="splash-nom">Find-Flow</span></div>
+    <div class="splash-par"><span>un produit</span><img src="../tableau-de-bord/logo/logo-camslabs.png" alt="Cams-Lab"></div>
+  </div>
+
+  <!-- Carte plein écran -->
+  <div id="carte"></div>
+  <div id="carte-hors-ligne" class="bandeau-hors-ligne" hidden>Carte indisponible. Les positions restent affichées.</div>
+
+  <!-- Barre du haut, flottante -->
+  <header class="topbar-m">
+    <div class="marque-m"><span class="pastille-m"></span><b>Find-Flow</b></div>
+    <button class="rond-m" id="btn-voir-tout" aria-label="Voir tout">
+      <svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    </button>
+    <button class="rond-m" id="btn-reglages" aria-label="Réglages">
+      <svg viewBox="0 0 24 24"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>
+    </button>
+  </header>
+
+  <!-- Feuille qui remonte du bas -->
+  <section class="feuille" id="feuille">
+    <div class="poignee" id="poignee"></div>
+
+    <!-- Vue LISTE -->
+    <div class="feuille-liste" id="vue-liste">
+      <div class="feuille-titre">Appareils <span class="pastille-compte" id="compte">0</span></div>
+      <div class="chips-m">
+        <span class="chip chip-ok"><b id="stat-en-ligne">0</b> en ligne</span>
+        <span class="chip chip-alerte"><b id="stat-alertes">0</b> alertes</span>
+      </div>
+      <div id="liste" class="liste-m"></div>
+    </div>
+
+    <!-- Vue DÉTAIL -->
+    <div class="feuille-detail" id="vue-detail" hidden>
+      <button class="retour" id="btn-retour">‹ Retour</button>
+      <div id="detail-corps"></div>
+    </div>
+  </section>
+
+  <!-- Barre d'onglets -->
+  <nav class="onglets">
+    <button class="onglet actif" id="ong-carte">
+      <svg viewBox="0 0 24 24"><path d="M12 21s-7-6.3-7-11a7 7 0 1 1 14 0c0 4.7-7 11-7 11Z" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="10" r="2.4" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>
+      <span>Carte</span>
+    </button>
+    <button class="onglet" id="ong-liste">
+      <svg viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <span>Appareils</span>
+    </button>
+    <button class="onglet" id="ong-reglages">
+      <svg viewBox="0 0 24 24"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>
+      <span>Réglages</span>
+    </button>
+  </nav>
+
+  <!-- Réglages (fenêtre) -->
+  <div id="modale-reglages" class="modale-m" hidden>
+    <div class="modale-fond" id="reglages-fond"></div>
+    <div class="modale-boite-m">
+      <div class="modale-entete"><h2>Réglages</h2><button class="fiche-fermer" id="reglages-fermer">×</button></div>
+      <label class="champ">Clé carte (MapTiler)<input id="reg-cle-carte" type="text" placeholder="Colle ta clé MapTiler"></label>
+      <label class="champ">Configuration Firebase<textarea id="reg-firebase" rows="6" placeholder="Colle le bloc firebaseConfig"></textarea></label>
+      <button class="pilule pilule-principale pilule-large" id="reglages-enregistrer">Enregistrer</button>
+      <p class="aide" id="reglages-message"></p>
+      <p class="aide">Développé par Cams-Lab — © 2026 Cams-Lab</p>
+    </div>
+  </div>
+
+  <script src="../tableau-de-bord/vendor/leaflet/leaflet.js"></script>
+  <script src="../tableau-de-bord/scripts/01-config.js"></script>
+  <script src="../tableau-de-bord/scripts/04-geo.js"></script>
+  <script src="../tableau-de-bord/scripts/05-format.js"></script>
+  <script src="../tableau-de-bord/scripts/06-donnees-demo.js"></script>
+  <script src="../tableau-de-bord/scripts/07-stockage.js"></script>
+  <script src="../tableau-de-bord/scripts/08-stockage-firebase.js"></script>
+  <script src="../tableau-de-bord/scripts/09-choix-stockage.js"></script>
+  <script src="../tableau-de-bord/scripts/20-carte.js"></script>
+  <script src="../tableau-de-bord/scripts/50-alertes.js"></script>
+  <script src="scripts/mobile.js"></script>
+</body>
+</html>
