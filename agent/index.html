@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Agent Find-Flow</title>
+  <meta name="author" content="Cams-Lab (Seya Gilles Cames)">
+  <script>
+    try { var t = localStorage.getItem('findflow.theme'); if (t === 'dark') document.documentElement.setAttribute('data-theme','dark'); } catch (e) {}
+  </script>
+  <link rel="stylesheet" href="../tableau-de-bord/styles/01-base.css">
+  <link rel="stylesheet" href="styles/agent.css">
+</head>
+<body>
+  <main class="agent">
+    <div class="agent-marque"><span class="pastille"></span><b>Find-Flow</b> — Agent</div>
+
+    <!-- Réglage de la configuration serveur, si absente (test uniquement ;
+         à la vraie installation, elle sera fixée à la fabrication de l'app). -->
+    <section id="bloc-config" hidden>
+      <h2>Configuration</h2>
+      <p class="aide">Colle la configuration Firebase de ton entreprise pour relier cet
+        appareil à ton compte.</p>
+      <label class="champ">Configuration Firebase
+        <textarea id="agent-firebase" rows="6" placeholder="Colle le bloc firebaseConfig"></textarea>
+      </label>
+      <button class="pilule pilule-principale pilule-large" id="agent-config-enregistrer">Enregistrer</button>
+    </section>
+
+    <!-- Suivi -->
+    <section id="bloc-suivi">
+      <h2>Suivre cet appareil</h2>
+      <p class="aide">Quand le suivi est allumé, cet appareil envoie sa position à ton
+        compte. Garde l'app ouverte et autorise la localisation.</p>
+      <label class="champ">Nom de cet appareil
+        <input id="agent-nom" type="text" placeholder="Ex : Téléphone Awa">
+      </label>
+      <button class="pilule pilule-principale pilule-large" id="agent-demarrer">Démarrer le suivi</button>
+      <button class="pilule pilule-large" id="agent-arreter" hidden>Arrêter le suivi</button>
+      <div class="agent-etat" id="agent-etat">Suivi arrêté.</div>
+      <button class="lien-deco" id="agent-deco" hidden>Changer de compte</button>
+    </section>
+
+    <p class="aide agent-pied">Développé par Cams-Lab — © 2026 Cams-Lab</p>
+  </main>
+
+  <script src="../tableau-de-bord/scripts/01-config.js"></script>
+  <script src="../tableau-de-bord/scripts/06-donnees-demo.js"></script>
+  <script src="../tableau-de-bord/scripts/07-stockage.js"></script>
+  <script src="../tableau-de-bord/scripts/08-stockage-firebase.js"></script>
+  <script src="scripts/agent.js"></script>
+</body>
+</html>

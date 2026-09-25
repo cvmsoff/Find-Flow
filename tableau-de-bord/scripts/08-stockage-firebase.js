@@ -14,6 +14,13 @@
 var FindFlow = window.FindFlow || (window.FindFlow = {});
 
 FindFlow.stockageFirebase = (function creerStockageFirebase() {
+  /* On calcule où se trouve la bibliothèque Firebase à partir de l'adresse de CE
+     fichier, et non par rapport à la page. Sinon, une page rangée ailleurs (le
+     mobile, l'agent) chercherait Firebase au mauvais endroit et tomberait en
+     panne. « …/scripts/08-….js » -> « …/vendor/firebase/ ». */
+  const urlModule = (document.currentScript && document.currentScript.src) || '';
+  const baseFirebase = urlModule.replace(/[^/]*$/, '').replace(/scripts\/$/, 'vendor/firebase/');
+
   const abonnes = new Set();
   let cache = [];
   let db = null;
@@ -64,42 +71,96 @@ FindFlow.stockageFirebase = (function creerStockageFirebase() {
     for (const rappel of abonnes) deleguer.ecouter(rappel);
   }
 
+  /* Connexion au compte : si une session existe déjà, on la garde ; sinon on
+     affiche l'écran e-mail/mot de passe. Renvoie l'identifiant du compte (uid). */
+  function connecter(auth) {
+    return new Promise(function (resoudre, rejeter) {
+      const off = auth.onAuthStateChanged(function (u) {
+        off();
+        if (u) { resoudre(u.uid); return; }
+        afficherConnexion(auth).then(resoudre, rejeter);
+      });
+    });
+  }
+
+  /* Écran de connexion, créé à la volée (pas de HTML à ajouter dans chaque page).
+     Deux boutons : se connecter, ou créer le compte de l'entreprise. */
+  function afficherConnexion(auth) {
+    return new Promise(function (resoudre, rejeter) {
+      const fond = document.createElement('div');
+      fond.className = 'connexion-fond';
+      fond.innerHTML =
+        '<form class="connexion-boite" autocomplete="on">' +
+        '<h2>Connexion Find-Flow</h2>' +
+        '<p class="aide">Connecte-toi au compte de ton entreprise. Le PC et les téléphones ' +
+        'utilisent le même compte.</p>' +
+        '<label class="champ">E-mail<input type="email" id="cx-email" required></label>' +
+        '<label class="champ">Mot de passe<input type="password" id="cx-mdp" required></label>' +
+        '<button type="submit" class="pilule pilule-principale pilule-large" id="cx-entrer">Se connecter</button>' +
+        '<button type="button" class="pilule pilule-large" id="cx-creer">Créer le compte</button>' +
+        '<p class="aide" id="cx-msg"></p>' +
+        '</form>';
+      document.body.appendChild(fond);
+
+      const email = fond.querySelector('#cx-email');
+      const mdp = fond.querySelector('#cx-mdp');
+      const msg = fond.querySelector('#cx-msg');
+
+      function traduire(e) {
+        const c = e && e.code || '';
+        if (c.indexOf('wrong-password') !== -1 || c.indexOf('invalid-credential') !== -1) return 'Mot de passe incorrect.';
+        if (c.indexOf('user-not-found') !== -1) return 'Ce compte n’existe pas. Crée-le avec « Créer le compte ».';
+        if (c.indexOf('email-already-in-use') !== -1) return 'Ce compte existe déjà. Utilise « Se connecter ».';
+        if (c.indexOf('weak-password') !== -1) return 'Mot de passe trop court (au moins 6 caractères).';
+        if (c.indexOf('invalid-email') !== -1) return 'Adresse e-mail invalide.';
+        return 'Impossible pour l’instant. Vérifie ta connexion et réessaie.';
+      }
+      function terminer(cred) { document.body.removeChild(fond); resoudre(cred.user.uid); }
+      function echec(e) { if (msg) msg.textContent = traduire(e); }
+
+      fond.querySelector('form').addEventListener('submit', function (ev) {
+        ev.preventDefault();
+        auth.signInWithEmailAndPassword(email.value.trim(), mdp.value).then(terminer, echec);
+      });
+      fond.querySelector('#cx-creer').addEventListener('click', function () {
+        auth.createUserWithEmailAndPassword(email.value.trim(), mdp.value).then(terminer, echec);
+      });
+    });
+  }
+
+  /* Prépare Firebase UNE fois : charge les scripts, démarre l'app, connecte au
+     compte. Renvoie { db, compte } prêt à l'emploi. Réutilisé par le viewer
+     (écoute) ET par l'agent (envoi de position). */
+  let preparation = null;
+  function preparer() {
+    if (preparation) return preparation;
+    preparation = (async function () {
+      const config = lireConfig();
+      if (!config) throw new Error('Configuration absente ou illisible.');
+      await chargerScript(baseFirebase + 'firebase-app-compat.js');
+      await chargerScript(baseFirebase + 'firebase-auth-compat.js');
+      await chargerScript(baseFirebase + 'firebase-firestore-compat.js');
+      if (!firebase.apps.length) firebase.initializeApp(config);
+      db = firebase.firestore();
+      /* CONNEXION AU COMPTE DE L'ENTREPRISE : PC et téléphones sur le MÊME
+         compte, c'est ce qui fait qu'un téléphone apparaît sur ton PC. */
+      compte = await connecter(firebase.auth());
+      return { db: db, compte: compte };
+    })();
+    return preparation;
+  }
+
   async function initialiser() {
     if (initLancee) return;
     initLancee = true;
 
-    const config = lireConfig();
-    if (!config) { basculerVersDemo('Configuration absente ou illisible.'); return; }
-
     try {
-      await chargerScript('vendor/firebase/firebase-app-compat.js');
-      await chargerScript('vendor/firebase/firebase-auth-compat.js');
-      await chargerScript('vendor/firebase/firebase-firestore-compat.js');
-
-      firebase.initializeApp(config);
-      db = firebase.firestore();
-
-      /* Connexion anonyme pour cette première étape : elle donne un identifiant
-         de compte stable sur ce poste, suffisant pour prouver que la chaîne
-         marche. La vraie connexion (e-mail/mot de passe) viendra ensuite. */
-      const identifiant = await firebase.auth().signInAnonymously();
-      compte = identifiant.user.uid;
-
+      await preparer();
       const collection = db.collection('appareils').where('compte', '==', compte);
 
-      /* Au tout premier lancement, la base est vide : on y sème les appareils de
-         démonstration (rattachés à ce compte) pour voir tout de suite quelque
-         chose et vérifier que l'écriture marche. Ensuite, ce sont les vrais
-         agents qui rempliront la base. */
-      const instantane = await collection.get();
-      if (instantane.empty) {
-        const lot = db.batch();
-        FindFlow.donneesDemo().forEach(function (a) {
-          const doc = db.collection('appareils').doc(a.id);
-          lot.set(doc, Object.assign({}, a, { compte: compte }));
-        });
-        await lot.commit();
-      }
+      /* On ne sème PLUS de faux appareils : ce sont les vrais agents installés
+         sur les téléphones qui remplissent la base. Au début, la liste peut donc
+         être vide tant qu'aucun agent n'a envoyé sa position. */
 
       /* Écoute temps réel : à chaque changement, on reconstruit la liste. */
       collection.onSnapshot(function (snap) {
@@ -170,6 +231,53 @@ FindFlow.stockageFirebase = (function creerStockageFirebase() {
       if (deleguer) return deleguer.rafraichir();
       notifier();
       return Promise.resolve(true);
+    },
+
+    /* CÔTÉ AGENT (sur le téléphone suivi) : enregistre CET appareil sous le
+       compte connecté, puis envoie sa position GPS en continu. C'est ce qui fait
+       apparaître le téléphone sur le tableau de bord du PC.
+       - `infos` : { nom, type }.
+       - `surPosition` : rappel optionnel(position) pour afficher l'état à l'écran.
+       Renvoie une fonction pour ARRÊTER le suivi. */
+    suivreCetAppareil(infos, surPosition) {
+      let veille = null;
+      preparer().then(function (p) {
+        /* Un identifiant stable pour cet appareil, gardé sur le téléphone : on ne
+           crée pas un nouvel appareil à chaque ouverture de l'app. */
+        let id;
+        try { id = window.localStorage.getItem('findflow.appareilId'); } catch (e) { id = null; }
+        if (!id) {
+          id = 'app-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 7);
+          try { window.localStorage.setItem('findflow.appareilId', id); } catch (e) { /* tant pis */ }
+        }
+        const ref = p.db.collection('appareils').doc(id);
+        /* Fiche de base (fusion : on n'écrase pas ce qui existe déjà). */
+        ref.set({
+          compte: p.compte,
+          nom: (infos && infos.nom) || 'Mon appareil',
+          type: (infos && infos.type) || 'telephone',
+          estAMoi: true, mode: 'normal'
+        }, { merge: true });
+
+        if (!navigator.geolocation) { throw new Error('Ce téléphone ne donne pas sa position.'); }
+        veille = navigator.geolocation.watchPosition(function (pos) {
+          const position = {
+            lat: pos.coords.latitude, lng: pos.coords.longitude,
+            precision_m: Math.round(pos.coords.accuracy || 0)
+          };
+          ref.set({ position: position, derniereMaj: new Date().toISOString() }, { merge: true });
+          if (surPosition) surPosition(position);
+        }, function (err) {
+          if (surPosition) surPosition({ erreur: err && err.message });
+        }, { enableHighAccuracy: true, maximumAge: 4000, timeout: 20000 });
+      });
+      return function arreter() { if (veille !== null && navigator.geolocation) navigator.geolocation.clearWatch(veille); };
+    },
+
+    /* Se déconnecter du compte (utile pour changer de compte). */
+    deconnexion() {
+      return preparer().then(function () { return firebase.auth().signOut(); })
+        .then(function () { window.location.reload(); });
     }
   };
 })();

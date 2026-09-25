@@ -1,0 +1,22 @@
+/* Agent Find-Flow : écran simple, une action évidente. Réutilise les jetons de
+   couleur du bureau (01-base.css). */
+
+body { min-height: 100%; background: var(--bg); }
+.agent { max-width: 460px; margin: 0 auto; padding: 24px 18px calc(env(safe-area-inset-bottom) + 24px); }
+.agent-marque { display: flex; align-items: center; gap: 10px; font-size: 18px; margin-bottom: 18px; }
+.agent-marque .pastille { width: 24px; height: 24px; border-radius: 8px; background: linear-gradient(135deg, var(--brand), #34d17f); }
+
+.agent section { background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+  padding: 16px; margin-bottom: 14px; box-shadow: var(--ombre-douce); }
+.agent h2 { font-size: 18px; margin-bottom: 6px; }
+
+.agent-etat { margin-top: 14px; padding: 12px 14px; border-radius: 12px; background: var(--surface-2);
+  font-size: 14px; line-height: 1.5; }
+.agent-etat.actif { background: #eaf7ef; color: var(--brand-fort); }
+:root[data-theme="dark"] .agent-etat.actif { background: #12261c; }
+.agent-etat.erreur { background: var(--danger-doux); color: var(--danger); }
+
+.lien-deco { display: block; margin: 12px auto 0; border: 0; background: transparent; color: var(--muted);
+  text-decoration: underline; cursor: pointer; font-size: 13px; }
+.agent-pied { text-align: center; margin-top: 8px; }
+.champ textarea { font-family: "Menlo", "Consolas", monospace; font-size: 12px; resize: vertical; }
