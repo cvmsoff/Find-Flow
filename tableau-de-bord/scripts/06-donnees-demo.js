@@ -41,6 +41,10 @@ FindFlow.donneesDemo = function creerAppareilsDemo() {
       position: { lat: 5.3364, lng: -4.0267, precision_m: 12 },
       batterie: 74,
       mode: 'normal',
+      /* « C'est mon appareil » : coché = appareil acheté et utilisé par le
+         patron. Seuls ces appareils ouvrent la caméra en direct et les fonctions
+         propriétaire. Un appareil non coché ne les propose jamais. */
+      estAMoi: true,
       sim: { numero: '+225 07 00 00 00 01', changee: false },
       /* Une zone centrée sur le bureau : ce téléphone est actuellement à ~700 m,
          donc HORS zone — pour montrer l'alerte de sortie de clôture. */
@@ -59,6 +63,9 @@ FindFlow.donneesDemo = function creerAppareilsDemo() {
       /* Batterie volontairement basse pour montrer l'alerte « batterie faible ». */
       batterie: 12,
       mode: 'normal',
+      /* Laissé NON coché pour montrer l'état verrouillé : pas de caméra ni de
+         fonctions propriétaire tant que « c'est mon appareil » n'est pas coché. */
+      estAMoi: false,
       sim: null, // un PC n'a pas forcément de carte SIM
       /* Zone large autour du bureau, où il se trouve : pas d'alerte de sortie. */
       zone: { lat: bureau.lat, lng: bureau.lng, rayon_m: 500 },
@@ -75,6 +82,7 @@ FindFlow.donneesDemo = function creerAppareilsDemo() {
       /* Volontairement silencieux depuis longtemps : montre l'état « hors ligne ».
          Et sa SIM a « changé » pour montrer l'alerte la plus utile en cas de vol. */
       mode: 'normal',
+      estAMoi: true,
       sim: { numero: '+225 05 11 22 33 44', changee: true },
       zone: null,
       historique: trajetVers(5.3550, -3.9968, 6),

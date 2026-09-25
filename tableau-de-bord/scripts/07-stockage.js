@@ -123,6 +123,17 @@ FindFlow.stockage = (function creerStockage() {
       return Promise.resolve(true);
     },
 
+    /* Marque un appareil comme « le mien » (ou non). C'est CE drapeau qui ouvre
+       la caméra en direct et les fonctions propriétaire : elles n'existent que
+       pour les appareils que le patron possède et utilise lui-même. */
+    definirPropriete(id, estAMoi) {
+      appareils = appareils.map(function (a) {
+        return a.id === id ? Object.assign({}, a, { estAMoi: !!estAMoi }) : a;
+      });
+      notifier();
+      return Promise.resolve(true);
+    },
+
     dernierEtat() {
       return appareils.map((a) => JSON.parse(JSON.stringify(a)));
     },

@@ -63,6 +63,7 @@ FindFlow.details = (function creerDetails() {
     corps.innerHTML =
       blocAlertes(a) +
       blocPhoto(a) +
+      blocPropriete(a) +
       ligne('Propriétaire', ech(a.proprietaire)) +
       ligne('Type', FindFlow.format.typeLisible(a.type)) +
       ligne('État', a.mode === 'vole' ? 'VOLÉ' : (enLigne ? 'En ligne' : 'Hors ligne')) +
@@ -132,6 +133,30 @@ FindFlow.details = (function creerDetails() {
     };
     img.onerror = function () { /* fichier illisible : on ne change rien */ };
     img.src = dataUrl;
+  }
+
+  /* La case « c'est mon appareil » et, si elle est cochée, les fonctions
+     propriétaire (caméra en direct…). C'est LE garde-fou : ces fonctions
+     n'apparaissent que sur un appareil que le patron déclare sien. */
+  function blocPropriete(a) {
+    const enLigne = FindFlow.format.estEnLigne(a);
+    let proprio;
+    if (a.estAMoi) {
+      proprio = '<div class="bloc-proprio">' +
+        '<div class="proprio-titre">Fonctions propriétaire</div>' +
+        (enLigne
+          ? '<button id="btn-camera" class="pilule pilule-petite">Caméra en direct</button>'
+          : '<span class="aide">Appareil hors ligne : la caméra sera disponible dès qu’il sera connecté.</span>') +
+        '<p id="camera-info" class="aide" hidden></p>' +
+      '</div>';
+    } else {
+      proprio = '<p class="aide">Coche « C’est mon appareil » pour activer la caméra en direct ' +
+        'et les fonctions réservées à tes propres appareils.</p>';
+    }
+    return '<label class="ligne-amoi">' +
+        '<input type="checkbox" id="chk-amoi"' + (a.estAMoi ? ' checked' : '') + '>' +
+        '<span>C’est mon appareil <span class="amoi-sous">(acheté et utilisé par moi)</span></span>' +
+      '</label>' + proprio;
   }
 
   /* En haut de la fiche : les alertes, en clair. Rien si tout va bien. */
@@ -204,6 +229,21 @@ FindFlow.details = (function creerDetails() {
     if (photo) photo.onclick = function () { choisirPhoto(a); };
     const photoRetirer = document.getElementById('btn-photo-retirer');
     if (photoRetirer) photoRetirer.onclick = function () { FindFlow.stockage.definirPhoto(a.id, null); };
+
+    const amoi = document.getElementById('chk-amoi');
+    if (amoi) amoi.onchange = function () { FindFlow.stockage.definirPropriete(a.id, amoi.checked); };
+
+    const camera = document.getElementById('btn-camera');
+    if (camera) camera.onclick = function () {
+      const info = document.getElementById('camera-info');
+      if (!info) return;
+      /* Honnête : le bouton est prêt, mais le flux vidéo réel viendra avec
+         l'agent installé sur l'appareil (étape mobile) et le lien WebRTC. */
+      info.hidden = false;
+      info.textContent = 'Caméra en direct prête côté tableau de bord. Le flux vidéo ' +
+        's’activera quand l’agent Find-Flow sera installé sur l’appareil (étape mobile). ' +
+        'Le voyant caméra restera visible sur l’appareil.';
+    };
   }
 
   function basculerVol(a) {

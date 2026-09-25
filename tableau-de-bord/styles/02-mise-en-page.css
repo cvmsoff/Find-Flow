@@ -123,6 +123,16 @@
 .avatar-grand { width: 64px; height: 64px; font-size: 22px; --anneau: var(--border); }
 .actions-photo { display: flex; flex-wrap: wrap; gap: 8px; }
 
+/* Case « c'est mon appareil » + section propriétaire */
+.ligne-amoi { display: flex; align-items: center; gap: 10px; margin: 4px 0 10px;
+  font-size: 14px; font-weight: 600; cursor: pointer; }
+.ligne-amoi input { width: 18px; height: 18px; accent-color: var(--brand); flex: 0 0 auto; }
+.amoi-sous { color: var(--muted); font-weight: 400; }
+.bloc-proprio { background: var(--surface-2); border-radius: 12px; padding: 10px 12px; margin-bottom: 10px; }
+.proprio-titre { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase;
+  letter-spacing: .04em; margin-bottom: 8px; }
+#camera-info { margin-top: 8px; }
+
 /* ---- Fiche flottante (détails) en bas à gauche ---- */
 /* La fiche se pose au même endroit que le panneau et le recouvre : sélectionner
    un appareil « ouvre » sa fiche à la place de la liste (comme Life360). */
