@@ -95,19 +95,33 @@ FindFlow.carte = (function creerCarte() {
         }).addTo(groupe);
       }
 
-      const point = L.circleMarker([a.position.lat, a.position.lng], {
-        radius: 9, color: '#fff', weight: 2,
-        fillColor: couleur(a), fillOpacity: 1
-      }).addTo(groupe);
-
-      /* Le contenu de l'infobulle est échappé : un nom d'appareil piégé
-         s'affiche, il ne s'exécute pas. */
-      point.bindTooltip(FindFlow.format.echapper(a.nom), { direction: 'top' });
-      point.on('click', function () { if (surClic) surClic(a.id); });
+      /* Le marqueur est un avatar rond avec le nom en dessous (façon Life360).
+         L'anneau prend la couleur du statut, l'avatar la couleur stable de
+         l'appareil. Nom et initiales sont échappés : un nom piégé s'affiche,
+         il ne s'exécute pas. */
+      const nomSur = FindFlow.format.echapper(a.nom);
+      const icone = L.divIcon({
+        className: '',
+        html:
+          '<div class="marqueur ' + classeStatut(a) + '">' +
+            '<div class="marqueur-avatar" style="background:' + FindFlow.format.couleurAvatar(a.id) + '">' +
+              FindFlow.format.initiales(a.nom) + '</div>' +
+            '<div class="marqueur-nom">' + nomSur + '</div>' +
+          '</div>',
+        iconSize: [40, 40], iconAnchor: [20, 20]
+      });
+      const marqueur = L.marker([a.position.lat, a.position.lng], { icon: icone }).addTo(groupe);
+      marqueur.on('click', function () { if (surClic) surClic(a.id); });
 
       groupe.addTo(carte);
       couchesParAppareil.set(a.id, groupe);
     });
+  }
+
+  /* La classe de statut décide la couleur de l'anneau autour de l'avatar. */
+  function classeStatut(a) {
+    if (a.mode === 'vole') return 'vole';
+    return FindFlow.format.estEnLigne(a) ? 'en-ligne' : 'hors-ligne';
   }
 
   /* Centrer sur un appareil quand on le choisit dans la liste. */

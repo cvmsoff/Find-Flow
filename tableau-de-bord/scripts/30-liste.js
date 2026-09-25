@@ -62,19 +62,22 @@ FindFlow.liste = (function creerListe() {
             (alertes.length > 1 ? ' +' + (alertes.length - 1) : '') + '</span>'
         : '';
 
+      /* Avatar rond coloré (le même appareil garde sa couleur) + anneau de statut. */
+      const avatar = '<span class="avatar" style="background:' + FindFlow.format.couleurAvatar(a.id) + '">' +
+        FindFlow.format.initiales(a.nom) + '</span>';
+      const batt = (typeof a.batterie === 'number')
+        ? '<span class="appareil-batt">' + Math.round(a.batterie) + ' %</span>' : '';
+
       return '' +
         '<button class="appareil ' + classeEtat + '" data-id="' + FindFlow.format.echapper(a.id) + '">' +
-          '<span class="appareil-icone">' + iconeType(a.type) + '<span class="point"></span></span>' +
+          avatar +
           '<span class="appareil-texte">' +
             '<span class="appareil-nom">' + FindFlow.format.echapper(a.nom) + '</span>' +
-            '<span class="appareil-info">' +
-              FindFlow.format.typeLisible(a.type) + ' · ' +
-              FindFlow.format.echapper(a.proprietaire) +
-            '</span>' +
-            '<span class="appareil-maj">' + etiquetteEtat + ' · ' +
+            '<span class="appareil-sous">' + etiquetteEtat + ' · ' +
               FindFlow.format.depuis(a.derniereMaj) + '</span>' +
             badge +
           '</span>' +
+          batt +
         '</button>';
     }).join('');
 
@@ -83,15 +86,6 @@ FindFlow.liste = (function creerListe() {
         if (surSelection) surSelection(bouton.getAttribute('data-id'));
       });
     });
-  }
-
-  /* Une petite icône par type d'appareil : on reconnaît un téléphone d'un
-     ordinateur d'un coup d'œil, sans lire le texte. */
-  function iconeType(type) {
-    if (type === 'telephone') {
-      return '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="3" width="10" height="18" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M11 18h2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
-    }
-    return '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="11" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M2 20h20" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
   }
 
   function majStats() {

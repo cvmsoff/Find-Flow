@@ -97,8 +97,8 @@ FindFlow.details = (function creerDetails() {
         '<label class="champ-en-ligne">Rayon (m) ' +
           '<input id="zone-rayon" type="number" min="50" step="50" value="' +
           FindFlow.config.rayonZoneParDefaut + '"></label>' +
-        '<button id="bouton-zone-poser" class="bouton bouton-neutre">Poser la zone ici</button>' +
-        (a.zone ? '<button id="bouton-zone-retirer" class="bouton bouton-neutre">Retirer la zone</button>' : '') +
+        '<button id="bouton-zone-poser" class="pilule pilule-petite">Poser la zone ici</button>' +
+        (a.zone ? '<button id="bouton-zone-retirer" class="pilule pilule-petite">Retirer la zone</button>' : '') +
       '</div>';
   }
 
@@ -124,10 +124,10 @@ FindFlow.details = (function creerDetails() {
     if (voler) {
       if (a.mode === 'vole') {
         voler.textContent = 'Ne plus considérer comme volé';
-        voler.className = 'bouton bouton-neutre';
+        voler.className = 'pilule';
       } else {
-        voler.textContent = 'Signaler cet appareil volé';
-        voler.className = 'bouton bouton-alerte';
+        voler.textContent = 'Signaler volé';
+        voler.className = 'pilule pilule-alerte';
       }
       voler.onclick = function () { basculerVol(a); };
     }

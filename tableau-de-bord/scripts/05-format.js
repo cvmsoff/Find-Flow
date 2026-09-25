@@ -63,5 +63,25 @@ FindFlow.format = {
     if (type === 'telephone') return 'Téléphone';
     if (type === 'ordinateur') return 'Ordinateur';
     return 'Appareil';
+  },
+
+  /* Les deux premières lettres marquantes du nom, pour l'avatar rond (façon
+     Life360, mais des appareils n'ont pas de photo). « Téléphone secrétaire »
+     -> « TS ». On échappe : ces initiales viennent d'un nom saisi par un humain. */
+  initiales(nom) {
+    const mots = String(nom || '?').trim().split(/\s+/).filter(Boolean);
+    const deux = (mots[0] || '?').charAt(0) + (mots[1] ? mots[1].charAt(0) : '');
+    return FindFlow.format.echapper(deux.toUpperCase() || '?');
+  },
+
+  /* Une couleur d'avatar stable pour un appareil : le même appareil garde
+     toujours la même pastille, ce qui aide l'œil à le suivre d'un écran à
+     l'autre. On tire la couleur de l'identifiant, pas du hasard. */
+  couleurAvatar(id) {
+    const palette = ['#7c5cff', '#16a34a', '#ff6b6b', '#f59e0b', '#06b6d4', '#ec4899', '#0ea5e9', '#84cc16'];
+    let somme = 0;
+    const s = String(id || '');
+    for (let i = 0; i < s.length; i++) somme += s.charCodeAt(i);
+    return palette[somme % palette.length];
   }
 };
