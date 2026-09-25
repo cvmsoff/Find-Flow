@@ -15,10 +15,12 @@ FindFlow.aPropos = (function creerAPropos() {
 
   function initialiser() {
     poser('version-app', FindFlow.config.version);
+    poser('version-rail', FindFlow.config.version);
     poser('annee-licence', new Date().getFullYear());
     remplirFormulaireReglages();
 
-    const ouvrir = document.getElementById('ouvrir-infos');
+    /* L'écran s'ouvre depuis la barre latérale (« Infos & réglages »). */
+    const ouvrir = document.getElementById('nav-reglages');
     const fermer = document.getElementById('infos-fermer');
     const enregistrer = document.getElementById('reglages-enregistrer');
     if (ouvrir) ouvrir.addEventListener('click', afficher);

@@ -37,7 +37,7 @@ FindFlow.liste = (function creerListe() {
   }
 
   function redessiner() {
-    majCompteurs();
+    majStats();
     const conteneur = document.getElementById('liste-appareils');
     if (!conteneur) return;
 
@@ -64,7 +64,7 @@ FindFlow.liste = (function creerListe() {
 
       return '' +
         '<button class="appareil ' + classeEtat + '" data-id="' + FindFlow.format.echapper(a.id) + '">' +
-          '<span class="pastille"></span>' +
+          '<span class="appareil-icone">' + iconeType(a.type) + '<span class="point"></span></span>' +
           '<span class="appareil-texte">' +
             '<span class="appareil-nom">' + FindFlow.format.echapper(a.nom) + '</span>' +
             '<span class="appareil-info">' +
@@ -85,12 +85,31 @@ FindFlow.liste = (function creerListe() {
     });
   }
 
-  function majCompteurs() {
+  /* Une petite icône par type d'appareil : on reconnaît un téléphone d'un
+     ordinateur d'un coup d'œil, sans lire le texte. */
+  function iconeType(type) {
+    if (type === 'telephone') {
+      return '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="3" width="10" height="18" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M11 18h2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
+    }
+    return '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="11" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M2 20h20" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
+  }
+
+  function majStats() {
     const enLigne = tousLesAppareils.filter(FindFlow.format.estEnLigne).length;
     const alertes = FindFlow.alertes.compterAppareils(tousLesAppareils);
-    poser('compteur-total', tousLesAppareils.length);
-    poser('compteur-en-ligne', enLigne);
-    poser('compteur-alertes', alertes);
+    poser('stat-total', tousLesAppareils.length);
+    poser('stat-en-ligne', enLigne);
+    poser('stat-alertes', alertes);
+    poser('stat-batterie', batterieMoyenne());
+  }
+
+  /* Batterie moyenne des seuls appareils qui savent la donner (un PC de bureau
+     branché n'a pas de batterie : l'inclure fausserait la moyenne). */
+  function batterieMoyenne() {
+    const avecBatterie = tousLesAppareils.filter(function (a) { return typeof a.batterie === 'number'; });
+    if (!avecBatterie.length) return '—';
+    const somme = avecBatterie.reduce(function (t, a) { return t + a.batterie; }, 0);
+    return Math.round(somme / avecBatterie.length) + ' %';
   }
 
   function poser(id, valeur) {

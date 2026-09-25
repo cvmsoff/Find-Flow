@@ -114,6 +114,13 @@ FindFlow.stockage = (function creerStockage() {
 
     dernierEtat() {
       return appareils.map((a) => JSON.parse(JSON.stringify(a)));
+    },
+
+    /* Redemande l'état tout de suite (bouton « Actualiser »). Avec le vrai
+       serveur, ce sera une relecture ; ici, on repousse simplement l'état. */
+    rafraichir() {
+      notifier();
+      return Promise.resolve(true);
     }
   };
 })();

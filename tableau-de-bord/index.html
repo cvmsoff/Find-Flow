@@ -8,7 +8,16 @@
   <meta name="description" content="Find-Flow, localisation des appareils de l'entreprise — développé par Cams-Lab">
   <meta name="copyright" content="© 2026 Cams-Lab">
 
-  <!-- Leaflet recopié en local dans vendor/ : jamais depuis un CDN. -->
+  <!-- On applique le thème AVANT le premier affichage pour éviter que l'écran
+       clignote (clair puis sombre) au chargement. Lecture tolérante au stockage
+       bloqué : en cas d'échec on reste sur le thème clair par défaut. -->
+  <script>
+    try {
+      var t = localStorage.getItem('findflow.theme');
+      if (t === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+    } catch (e) {}
+  </script>
+
   <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
   <link rel="stylesheet" href="styles/01-base.css">
   <link rel="stylesheet" href="styles/02-mise-en-page.css">
@@ -17,56 +26,127 @@
 
   <!-- Écran de démarrage : logo Cams-Lab discret, en bas. -->
   <div id="splash">
-    <div class="splash-titre">Find-Flow</div>
+    <div class="splash-marque">Find-Flow</div>
     <div class="splash-sous">Localisation des appareils</div>
     <img class="splash-logo" src="logo/logo-cams-lab.svg" alt="Cams-Lab">
   </div>
 
-  <header class="entete">
-    <div class="entete-gauche">
-      <strong>Find-Flow</strong>
-      <span class="entete-client" id="nom-client-entete">&lt;Client&gt;</span>
-    </div>
-    <div class="compteurs">
-      <span class="compteur"><b id="compteur-total">0</b> appareils</span>
-      <span class="compteur en-ligne"><b id="compteur-en-ligne">0</b> en ligne</span>
-      <span class="compteur alertes"><b id="compteur-alertes">0</b> alertes</span>
-    </div>
-    <button class="bouton bouton-neutre" id="ouvrir-infos">Infos & réglages</button>
-  </header>
+  <div class="app">
 
-  <main class="ecran">
-    <section class="panneau-liste">
-      <input id="recherche" class="recherche" type="search"
-             placeholder="Rechercher un appareil ou un propriétaire…"
-             aria-label="Rechercher un appareil">
-      <div id="liste-appareils" class="liste"></div>
-    </section>
-
-    <section class="panneau-carte">
-      <div id="carte-hors-ligne" class="bandeau-hors-ligne" hidden>
-        Fond de carte indisponible (pas de réseau). Les positions restent affichées.
+    <!-- Barre latérale (navigation) -->
+    <aside class="rail">
+      <div class="rail-marque">
+        <span class="rail-pastille"></span>
+        <span class="rail-nom">Find-Flow</span>
       </div>
-      <div id="carte"></div>
-    </section>
-  </main>
 
-  <!-- Panneau de détails d'un appareil -->
+      <nav class="rail-nav">
+        <button class="rail-item actif" id="nav-tableau" title="Tableau de bord">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13h7V4H4v9Zm0 7h7v-5H4v5Zm9 0h7V11h-7v9Zm0-16v5h7V4h-7Z"/></svg>
+          <span>Tableau de bord</span>
+        </button>
+        <button class="rail-item" id="nav-ajouter" title="Ajouter un appareil">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke-width="2" fill="none" stroke="currentColor" stroke-linecap="round"/></svg>
+          <span>Ajouter un appareil</span>
+        </button>
+        <button class="rail-item" id="nav-reglages" title="Infos & réglages">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M19 12a7 7 0 0 0-.1-1.1l2-1.6-2-3.4-2.4 1a7 7 0 0 0-1.9-1.1L14.2 2h-4l-.4 2.7a7 7 0 0 0-1.9 1.1l-2.4-1-2 3.4 2 1.6A7 7 0 0 0 5 12c0 .4 0 .8.1 1.1l-2 1.6 2 3.4 2.4-1a7 7 0 0 0 1.9 1.1l.4 2.7h4l.4-2.7a7 7 0 0 0 1.9-1.1l2.4 1 2-3.4-2-1.6c.1-.3.1-.7.1-1.1Z" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>
+          <span>Infos & réglages</span>
+        </button>
+      </nav>
+
+      <div class="rail-pied">
+        <div class="rail-signature">Développé par<br><strong>Cams-Lab</strong></div>
+        <div class="rail-version">v<span id="version-rail">0.0.0</span></div>
+      </div>
+    </aside>
+
+    <!-- Zone principale -->
+    <main class="principal">
+
+      <header class="topbar">
+        <div class="topbar-titre">
+          <h1>Tableau de bord</h1>
+          <span class="topbar-client" id="nom-client-entete">&lt;Client&gt;</span>
+        </div>
+
+        <div class="topbar-recherche">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="m20 20-3.2-3.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          <input id="recherche" type="search" placeholder="Rechercher un appareil ou un propriétaire…" aria-label="Rechercher un appareil">
+        </div>
+
+        <div class="topbar-actions">
+          <button class="btn btn-fantome" id="btn-actualiser" title="Actualiser">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-.6 4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M20 5v6h-6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span>Actualiser</span>
+          </button>
+          <button class="btn btn-fantome" id="btn-voir-tout" title="Recentrer la carte sur tous les appareils">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+            <span>Voir tout</span>
+          </button>
+          <button class="btn btn-principal" id="btn-ajouter-haut">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+            <span>Ajouter</span>
+          </button>
+          <button class="btn btn-icone" id="btn-theme" title="Basculer clair / sombre" aria-label="Basculer le thème">
+            <svg class="ico-soleil" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.4 1.4M17.6 17.6 19 19M19 5l-1.4 1.4M6.4 17.6 5 19" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+            <svg class="ico-lune" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+      </header>
+
+      <!-- Barre de statistiques -->
+      <section class="stats" aria-label="Résumé">
+        <article class="stat">
+          <div class="stat-libelle">Appareils</div>
+          <div class="stat-valeur" id="stat-total">0</div>
+        </article>
+        <article class="stat">
+          <div class="stat-libelle">En ligne</div>
+          <div class="stat-valeur ok" id="stat-en-ligne">0</div>
+        </article>
+        <article class="stat">
+          <div class="stat-libelle">En alerte</div>
+          <div class="stat-valeur danger" id="stat-alertes">0</div>
+        </article>
+        <article class="stat">
+          <div class="stat-libelle">Batterie moyenne</div>
+          <div class="stat-valeur" id="stat-batterie">—</div>
+        </article>
+      </section>
+
+      <!-- Liste + carte -->
+      <section class="contenu">
+        <div class="colonne-liste">
+          <div class="colonne-entete">Appareils</div>
+          <div id="liste-appareils" class="liste"></div>
+        </div>
+        <div class="colonne-carte">
+          <div id="carte-hors-ligne" class="bandeau-hors-ligne" hidden>
+            Fond de carte indisponible. Les positions restent affichées.
+          </div>
+          <div id="carte"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Volet : détails d'un appareil -->
   <aside id="details" class="volet" hidden>
     <div class="volet-entete">
       <h2 id="details-titre">Appareil</h2>
-      <button class="bouton-fermer" id="details-fermer" aria-label="Fermer">×</button>
+      <button class="volet-fermer" id="details-fermer" aria-label="Fermer">×</button>
     </div>
     <div id="details-corps"></div>
-    <button id="bouton-itineraire" class="bouton bouton-neutre">Ouvrir l'itinéraire vers l'appareil</button>
-    <button id="bouton-vol" class="bouton bouton-alerte">Signaler cet appareil volé</button>
+    <button id="bouton-itineraire" class="btn btn-fantome btn-large">Ouvrir l'itinéraire vers l'appareil</button>
+    <button id="bouton-vol" class="btn btn-danger btn-large">Signaler cet appareil volé</button>
   </aside>
 
-  <!-- Écran « À propos & réglages » -->
+  <!-- Volet : infos & réglages -->
   <aside id="infos" class="volet" hidden>
     <div class="volet-entete">
       <h2>Informations & réglages</h2>
-      <button class="bouton-fermer" id="infos-fermer" aria-label="Fermer">×</button>
+      <button class="volet-fermer" id="infos-fermer" aria-label="Fermer">×</button>
     </div>
 
     <h3>Réglages de l'entreprise</h3>
@@ -82,7 +162,7 @@
     </label>
     <p class="aide">Crée un compte gratuit sur maptiler.com, copie ta clé et colle-la ici
       pour afficher la carte OpenStreetMap. Sans clé, une carte de secours s'affiche.</p>
-    <button id="reglages-enregistrer" class="bouton bouton-principal">Enregistrer les réglages</button>
+    <button id="reglages-enregistrer" class="btn btn-principal btn-large">Enregistrer les réglages</button>
     <p id="reglages-message" class="aide"></p>
 
     <h3>À propos</h3>
@@ -95,6 +175,28 @@
     <img class="about-logo" src="logo/logo-cams-lab.svg" alt="Cams-Lab">
   </aside>
 
+  <!-- Fenêtre : ajouter un appareil -->
+  <div id="appairage" class="modale" hidden>
+    <div class="modale-fond" id="appairage-fond"></div>
+    <div class="modale-boite">
+      <div class="volet-entete">
+        <h2>Ajouter un appareil</h2>
+        <button class="volet-fermer" id="appairage-fermer" aria-label="Fermer">×</button>
+      </div>
+      <p class="aide">Pour suivre un appareil, on y installe l'agent Find-Flow, puis on saisit
+        le code ci-dessous. L'appareil apparaîtra alors dans la liste.</p>
+      <div class="code-appairage" id="appairage-code">— — — — — —</div>
+      <ol class="etapes">
+        <li>Installe l'application <strong>agent Find-Flow</strong> sur le téléphone ou le PC.</li>
+        <li>Ouvre-la et saisis le code ci-dessus.</li>
+        <li>Autorise la localisation. L'appareil se connecte tout seul.</li>
+      </ol>
+      <p class="aide" id="appairage-note">Note : les agents (Android et Windows) ne sont pas encore
+        disponibles — cet écran est prêt pour quand ils le seront.</p>
+      <button class="btn btn-fantome btn-large" id="btn-appairage-nouveau">Générer un autre code</button>
+    </div>
+  </div>
+
   <!-- Scripts chargés dans l'ordre. Un fichier = un sujet. -->
   <script src="vendor/leaflet/leaflet.js"></script>
   <script src="scripts/01-config.js"></script>
@@ -106,6 +208,8 @@
   <script src="scripts/30-liste.js"></script>
   <script src="scripts/50-alertes.js"></script>
   <script src="scripts/40-details.js"></script>
+  <script src="scripts/62-appairage.js"></script>
+  <script src="scripts/65-theme.js"></script>
   <script src="scripts/90-a-propos.js"></script>
   <script src="scripts/99-app.js"></script>
 </body>

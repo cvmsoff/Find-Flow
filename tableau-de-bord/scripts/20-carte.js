@@ -150,8 +150,20 @@ FindFlow.carte = (function creerCarte() {
     }
   }
 
+  /* Recentre la carte pour montrer TOUS les appareils d'un coup (« Voir tout »).
+     Utile quand ils sont éparpillés dans la ville. */
+  function ajusterSurTous(appareils) {
+    if (!carte) return;
+    const points = (appareils || [])
+      .filter(function (a) { return a.position; })
+      .map(function (a) { return [a.position.lat, a.position.lng]; });
+    if (points.length === 0) return;
+    if (points.length === 1) { carte.setView(points[0], 15); return; }
+    carte.fitBounds(points, { padding: [40, 40] });
+  }
+
   return {
     initialiser, afficher, centrerSur, montrerSelection, effacerSelection,
-    rafraichirFond: installerFond
+    ajusterSurTous, rafraichirFond: installerFond
   };
 })();

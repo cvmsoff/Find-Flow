@@ -1,132 +1,187 @@
-/* Mise en page : en-tête, liste à gauche, carte à droite, volets qui
-   glissent. Sur téléphone, la liste et la carte s'empilent. */
+/* Mise en page : coquille d'application (barre latérale + zone principale),
+   en-tête, statistiques, liste et carte, volets latéraux, fenêtre d'ajout.
+   Pensée d'abord pour un écran de bureau ; s'empile proprement sur téléphone. */
 
-/* Écran de démarrage */
+/* ---- Écran de démarrage ---- */
 #splash {
   position: fixed; inset: 0; z-index: 2000;
-  background: var(--vert); color: #fff;
+  background: var(--rail-bg); color: #fff;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
 }
-/* L'attribut hidden doit toujours l'emporter : sans cette règle, le display:flex
-   ci-dessus garderait l'écran de démarrage affiché et bloquerait tous les clics. */
-#splash[hidden] { display: none; }
-.splash-titre { font-size: 42px; font-weight: 800; letter-spacing: 1px; }
-.splash-sous { font-size: 16px; opacity: .9; margin-top: 6px; }
-.splash-logo { position: absolute; bottom: 28px; height: 34px; filter: brightness(0) invert(1); opacity: .9; }
+#splash[hidden] { display: none; } /* sans ça, le display:flex garderait l'écran affiché */
+.splash-marque { font-size: 40px; font-weight: 800; letter-spacing: -0.02em; }
+.splash-sous { font-size: 15px; opacity: .8; margin-top: 6px; }
+.splash-logo { position: absolute; bottom: 28px; height: 30px; filter: brightness(0) invert(1); opacity: .85; }
 
-/* En-tête */
-.entete {
-  display: flex; align-items: center; gap: 16px;
-  padding: 10px 16px; background: var(--carte-fond);
-  border-bottom: 1px solid var(--bordure);
+/* ---- Coquille ---- */
+.app { display: flex; height: 100vh; }
+
+/* Barre latérale */
+.rail {
+  width: 230px; flex: 0 0 230px;
+  background: var(--rail-bg); color: var(--rail-text);
+  display: flex; flex-direction: column; padding: 18px 14px;
 }
-.entete-gauche { display: flex; align-items: baseline; gap: 10px; }
-.entete-gauche strong { font-size: 20px; color: var(--vert-fonce); }
-.entete-client { color: var(--gris); font-size: 14px; }
-.compteurs { display: flex; gap: 14px; margin-left: auto; font-size: 14px; }
-.compteur b { font-size: 18px; }
-.compteur.en-ligne b { color: var(--vert); }
-.compteur.alertes b { color: var(--rouge); }
+.rail-marque { display: flex; align-items: center; gap: 10px; padding: 6px 8px 18px; }
+.rail-pastille { width: 22px; height: 22px; border-radius: 7px;
+  background: linear-gradient(135deg, var(--brand), #2fbe8c); }
+.rail-nom { font-weight: 800; font-size: 18px; color: #fff; letter-spacing: -0.01em; }
+
+.rail-nav { display: flex; flex-direction: column; gap: 4px; }
+.rail-item {
+  display: flex; align-items: center; gap: 11px; width: 100%;
+  padding: 10px 12px; border: 0; border-radius: 10px; cursor: pointer;
+  background: transparent; color: var(--rail-text); font-size: 14px; font-weight: 500;
+  text-align: left;
+}
+.rail-item svg { width: 19px; height: 19px; fill: currentColor; opacity: .9; }
+.rail-item:hover { background: var(--rail-actif); color: #fff; }
+.rail-item.actif { background: var(--rail-actif); color: #fff; font-weight: 600; }
+
+.rail-pied { margin-top: auto; display: flex; align-items: flex-end; justify-content: space-between;
+  padding: 12px 8px 4px; border-top: 1px solid rgba(255,255,255,.08); }
+.rail-signature { font-size: 12px; color: var(--rail-muted); line-height: 1.4; }
+.rail-signature strong { color: var(--rail-text); }
+.rail-version { font-size: 12px; color: var(--rail-muted); }
 
 /* Zone principale */
-.ecran { display: flex; height: calc(100% - 61px); }
-.panneau-liste {
-  width: 340px; min-width: 260px;
-  border-right: 1px solid var(--bordure);
-  background: var(--carte-fond);
-  display: flex; flex-direction: column;
-}
-.recherche {
-  margin: 12px; padding: 12px 14px; font-size: 16px;
-  border: 1px solid var(--bordure); border-radius: 10px;
-  background: #fff; color: var(--texte);
-}
-.liste { overflow-y: auto; padding: 0 8px 12px; }
-.vide { color: var(--gris); text-align: center; padding: 24px 8px; }
+.principal { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 
-/* Une ligne d'appareil = un gros bouton cliquable */
-.appareil {
-  display: flex; align-items: center; gap: 12px; width: 100%;
-  text-align: left; background: #fff; border: 1px solid var(--bordure);
-  border-radius: 12px; padding: 12px; margin: 6px 0; cursor: pointer;
+/* En-tête */
+.topbar {
+  display: flex; align-items: center; gap: 16px;
+  padding: 14px 22px; background: var(--surface); border-bottom: 1px solid var(--border);
 }
-.appareil:hover { border-color: var(--vert); }
-.pastille { width: 14px; height: 14px; border-radius: 50%; flex: 0 0 auto; background: var(--gris); }
-.appareil.en-ligne .pastille { background: var(--vert); }
-.appareil.hors-ligne .pastille { background: var(--gris); }
-.appareil.vole .pastille { background: var(--rouge); }
-.appareil.vole { border-color: var(--rouge); }
-.appareil-texte { display: flex; flex-direction: column; gap: 2px; }
-.appareil-nom { font-weight: 700; font-size: 16px; }
-.appareil-info { font-size: 13px; color: var(--gris); }
-.appareil-maj { font-size: 12px; color: var(--gris); }
-.appareil.vole .appareil-maj { color: var(--rouge); font-weight: 700; }
-.badge-alerte {
-  display: inline-block; margin-top: 4px; padding: 2px 8px;
-  background: #fdecea; color: var(--rouge); border-radius: 20px;
-  font-size: 12px; font-weight: 700;
+.topbar-titre { display: flex; flex-direction: column; }
+.topbar-titre h1 { font-size: 20px; }
+.topbar-client { font-size: 13px; color: var(--muted); margin-top: 2px; }
+
+.topbar-recherche { position: relative; flex: 1; max-width: 420px; margin-left: 8px; }
+.topbar-recherche svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+  width: 18px; height: 18px; color: var(--muted); }
+.topbar-recherche input {
+  width: 100%; padding: 10px 12px 10px 38px; font-size: 14px;
+  color: var(--text); background: var(--surface-2);
+  border: 1px solid var(--border); border-radius: 10px;
 }
 
-/* Carte */
-.panneau-carte { flex: 1; position: relative; }
-#carte { position: absolute; inset: 0; background: #e9eef1; }
+.topbar-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+
+/* Interrupteur clair/sombre : on montre l'icône adaptée au thème courant. */
+.ico-lune { display: none; }
+:root[data-theme="dark"] .ico-soleil { display: none; }
+:root[data-theme="dark"] .ico-lune { display: inline; }
+
+/* Statistiques */
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; padding: 18px 22px 6px; }
+.stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--rayon);
+  padding: 14px 16px; box-shadow: var(--ombre); }
+.stat-libelle { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+.stat-valeur { font-size: 28px; font-weight: 800; margin-top: 4px; letter-spacing: -0.02em; }
+.stat-valeur.ok { color: var(--ok); }
+.stat-valeur.danger { color: var(--danger); }
+
+/* Contenu : liste + carte */
+.contenu { flex: 1; min-height: 0; display: flex; gap: 16px; padding: 12px 22px 22px; }
+.colonne-liste {
+  width: 340px; flex: 0 0 340px; display: flex; flex-direction: column;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--rayon);
+  overflow: hidden; box-shadow: var(--ombre);
+}
+.colonne-entete { padding: 12px 16px; font-weight: 700; border-bottom: 1px solid var(--border); }
+.liste { overflow-y: auto; padding: 10px; }
+.vide { color: var(--muted); text-align: center; padding: 24px 8px; }
+
+.colonne-carte { flex: 1; min-width: 0; position: relative;
+  border: 1px solid var(--border); border-radius: var(--rayon); overflow: hidden; box-shadow: var(--ombre); }
+#carte { position: absolute; inset: 0; background: var(--surface-2); }
 .bandeau-hors-ligne {
-  position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
-  z-index: 500; background: #fff4e5; color: #8a5a00;
-  border: 1px solid #f0c987; border-radius: 8px; padding: 8px 14px; font-size: 14px;
+  position: absolute; top: 12px; left: 50%; transform: translateX(-50%); z-index: 500;
+  background: #fff7ed; color: var(--warn); border: 1px solid #f2c88a;
+  border-radius: 9px; padding: 8px 14px; font-size: 13px; max-width: 90%;
 }
 
-/* Volets latéraux (détails / infos) */
+/* Carte d'appareil dans la liste */
+.appareil {
+  display: flex; align-items: center; gap: 12px; width: 100%; text-align: left;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 11px;
+  padding: 12px; margin-bottom: 8px; cursor: pointer; color: var(--text);
+}
+.appareil:hover { border-color: var(--brand); }
+.appareil-icone { width: 38px; height: 38px; flex: 0 0 auto; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center; background: var(--surface-2); position: relative; }
+.appareil-icone svg { width: 20px; height: 20px; color: var(--muted); }
+.appareil-icone .point { position: absolute; right: -2px; bottom: -2px; width: 11px; height: 11px;
+  border-radius: 50%; border: 2px solid var(--surface); background: var(--muted); }
+.appareil.en-ligne .point { background: var(--ok); }
+.appareil.vole .point { background: var(--danger); }
+.appareil-texte { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.appareil-nom { font-weight: 700; font-size: 15px; }
+.appareil-info, .appareil-maj { font-size: 12.5px; color: var(--muted); }
+.appareil.vole .appareil-maj { color: var(--danger); font-weight: 700; }
+.badge-alerte { align-self: flex-start; margin-top: 4px; padding: 2px 8px;
+  background: var(--danger-doux); color: var(--danger); border-radius: 20px; font-size: 12px; font-weight: 700; }
+
+/* ---- Volets latéraux (détails / infos) ---- */
 .volet {
-  position: fixed; top: 0; right: 0; z-index: 1500;
-  width: 380px; max-width: 92vw; height: 100%;
-  background: #fff; border-left: 1px solid var(--bordure);
-  box-shadow: -8px 0 24px rgba(0,0,0,.08);
-  padding: 16px; overflow-y: auto;
+  position: fixed; top: 0; right: 0; z-index: 1500; width: 400px; max-width: 94vw; height: 100%;
+  background: var(--surface); border-left: 1px solid var(--border);
+  box-shadow: -10px 0 30px rgba(0,0,0,.14); padding: 18px; overflow-y: auto;
 }
-.volet-entete { display: flex; align-items: center; justify-content: space-between; }
-.volet-entete h2 { margin: 4px 0 12px; font-size: 20px; }
-.bouton-fermer { border: 0; background: none; font-size: 28px; line-height: 1; cursor: pointer; color: var(--gris); }
-.volet h3 { margin: 20px 0 4px; }
+.volet-entete { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.volet-entete h2 { font-size: 19px; }
+.volet-fermer { border: 0; background: transparent; font-size: 26px; line-height: 1; cursor: pointer; color: var(--muted); }
+.volet h3 { margin: 20px 0 4px; font-size: 15px; }
 
-.detail-ligne { display: flex; border-bottom: 1px solid var(--bordure); padding: 10px 0; }
-.detail-cle { width: 42%; color: var(--gris); font-size: 14px; }
+.detail-ligne { display: flex; border-bottom: 1px solid var(--border); padding: 10px 0; }
+.detail-cle { width: 42%; color: var(--muted); font-size: 14px; }
 .detail-valeur { flex: 1; font-size: 15px; }
 #bouton-itineraire { margin-top: 18px; }
 #bouton-vol { margin-top: 10px; }
 
-/* Alertes en haut de la fiche */
 .alertes-fiche { list-style: none; margin: 0 0 14px; padding: 0; }
-.alertes-fiche li {
-  background: #fdecea; color: var(--rouge); font-weight: 700;
-  border-radius: 8px; padding: 8px 12px; margin-bottom: 6px;
-}
+.alertes-fiche li { background: var(--danger-doux); color: var(--danger); font-weight: 700;
+  border-radius: 9px; padding: 8px 12px; margin-bottom: 6px; }
 
-/* Contrôles de la clôture géographique */
 .actions-zone { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; margin: 8px 0 4px; }
-.champ-en-ligne { font-size: 13px; color: var(--gris); }
-.champ-en-ligne input { width: 90px; margin-top: 4px; padding: 8px 10px; font-size: 15px;
-  border: 1px solid var(--bordure); border-radius: 8px; display: block; }
-.actions-zone .bouton { padding: 8px 12px; font-size: 14px; }
+.champ-en-ligne { font-size: 13px; color: var(--muted); }
+.champ-en-ligne input { width: 92px; margin-top: 4px; padding: 8px 10px; font-size: 15px;
+  color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: 8px; display: block; }
 
-/* Trajet récent */
-.historique { margin: 6px 0 0; padding-left: 20px; font-size: 13px; color: var(--texte); }
+.historique { margin: 6px 0 0; padding-left: 20px; font-size: 13px; }
 .historique li { padding: 3px 0; }
 
-/* À propos */
 .about { margin: 8px 0; }
-.about-row { display: flex; padding: 8px 0; border-bottom: 1px solid var(--bordure); }
-.about-row .k { width: 42%; color: var(--gris); }
+.about-row { display: flex; padding: 8px 0; border-bottom: 1px solid var(--border); }
+.about-row .k { width: 42%; color: var(--muted); }
 .about-row .v { flex: 1; }
-.about-logo { height: 30px; margin-top: 14px; opacity: .85; }
+.about-logo { height: 28px; margin-top: 14px; opacity: .8; }
+:root[data-theme="dark"] .about-logo { filter: brightness(0) invert(1); opacity: .7; }
 
-/* Téléphone : on empile liste et carte */
-@media (max-width: 720px) {
-  .entete { flex-wrap: wrap; }
-  .compteurs { width: 100%; order: 3; margin-left: 0; }
-  .ecran { flex-direction: column; height: auto; }
-  .panneau-liste { width: 100%; border-right: 0; border-bottom: 1px solid var(--bordure); }
-  .liste { max-height: 40vh; }
-  .panneau-carte { height: 55vh; }
+/* ---- Fenêtre « Ajouter un appareil » ---- */
+.modale { position: fixed; inset: 0; z-index: 1800; display: flex; align-items: center; justify-content: center; }
+.modale[hidden] { display: none; }
+.modale-fond { position: absolute; inset: 0; background: rgba(6,12,10,.5); }
+.modale-boite { position: relative; width: 460px; max-width: 92vw; background: var(--surface);
+  border: 1px solid var(--border); border-radius: 16px; padding: 20px; box-shadow: 0 20px 60px rgba(0,0,0,.3); }
+.code-appairage { font-size: 30px; font-weight: 800; letter-spacing: .18em; text-align: center;
+  background: var(--surface-2); border: 1px dashed var(--border); border-radius: 12px; padding: 16px; margin: 6px 0 14px; }
+.etapes { margin: 0 0 12px; padding-left: 20px; font-size: 14px; line-height: 1.6; }
+
+/* ---- Téléphone : on empile ---- */
+@media (max-width: 860px) {
+  .app { flex-direction: column; height: auto; }
+  .rail { width: 100%; flex: none; flex-direction: row; align-items: center; padding: 10px 12px; }
+  .rail-marque { padding: 0 10px 0 4px; }
+  .rail-nav { flex-direction: row; }
+  .rail-item span { display: none; } /* icônes seules sur téléphone */
+  .rail-pied { display: none; }
+  .topbar { flex-wrap: wrap; }
+  .topbar-recherche { order: 3; max-width: none; flex-basis: 100%; margin-left: 0; }
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  .contenu { flex-direction: column; padding: 12px; }
+  .colonne-liste { width: 100%; flex: none; }
+  .liste { max-height: 42vh; }
+  .colonne-carte { height: 56vh; }
   .volet { width: 100%; }
 }

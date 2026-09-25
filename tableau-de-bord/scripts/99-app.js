@@ -11,22 +11,45 @@ var FindFlow = window.FindFlow || (window.FindFlow = {});
   document.addEventListener('DOMContentLoaded', function () {
     /* L'écran de démarrage disparaît une fois la page prête. */
     const splash = document.getElementById('splash');
-    if (splash) setTimeout(function () { splash.hidden = true; }, 900);
+    if (splash) setTimeout(function () { splash.hidden = true; }, 800);
 
+    FindFlow.theme.initialiser();
     FindFlow.carte.initialiser('carte');
     FindFlow.liste.initialiser(ouvrirAppareil);
     FindFlow.details.initialiser();
+    FindFlow.appairage.initialiser();
     FindFlow.aPropos.initialiser();
 
-    /* Une seule écoute alimente tout le monde. */
+    brancherActionsHaut();
+
+    /* On garde le dernier état sous la main pour les boutons « Voir tout » et
+       « Actualiser », qui agissent sur ce que l'écran montre à cet instant. */
+    let dernierEtat = [];
     FindFlow.stockage.ecouter(function (appareils) {
+      dernierEtat = appareils;
       FindFlow.liste.mettreAJour(appareils);
       FindFlow.details.mettreAJour(appareils);
       FindFlow.carte.afficher(appareils, ouvrirAppareil);
     });
+
+    function brancherActionsHaut() {
+      lier('btn-actualiser', function () { FindFlow.stockage.rafraichir(); });
+      lier('btn-voir-tout', function () { FindFlow.carte.ajusterSurTous(dernierEtat); });
+      lier('btn-ajouter-haut', FindFlow.appairage.ouvrir);
+      lier('nav-ajouter', FindFlow.appairage.ouvrir);
+      /* « Tableau de bord » : on referme les volets pour revenir à la vue carte. */
+      lier('nav-tableau', function () {
+        FindFlow.details.masquer();
+      });
+    }
   });
 
   function ouvrirAppareil(id) {
     FindFlow.details.ouvrir(id);
+  }
+
+  function lier(id, action) {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('click', action);
   }
 })();

@@ -1,59 +1,104 @@
-/* Base : couleurs, texte, boutons. Volontairement sobre et lisible sur un
-   téléphone d'entrée de gamme comme sur un écran de bureau. Gros boutons,
-   fort contraste : nos utilisateurs travaillent debout et pressés. */
+/* Socle visuel de Find-Flow : couleurs, thème clair/sombre, texte, boutons.
+
+   POURQUOI DES « JETONS » DE COULEUR (variables) : on définit chaque couleur une
+   fois. Le thème sombre ne réécrit que ces variables, pas chaque écran — sinon
+   passer en sombre voudrait dire relire toute l'application. */
 
 :root {
-  --vert: #1f7a5a;
-  --vert-fonce: #155c43;
-  --rouge: #c0392b;
-  --gris: #7a8b99;
-  --texte: #12222b;
-  --fond: #f4f6f8;
-  --carte-fond: #fff;
-  --bordure: #dfe6ec;
+  color-scheme: light;
+
+  --bg: #f4f6f9;
+  --surface: #ffffff;
+  --surface-2: #eef1f5;
+  --text: #0f1b2a;
+  --muted: #5b6b7b;
+  --border: #e3e8ee;
+
+  /* Vert Cams-Lab : l'identité reste, on l'emploie comme couleur d'action. */
+  --brand: #157f5c;
+  --brand-fort: #0f5f45;
+  --ok: #16a34a;
+  --danger: #dc2626;
+  --danger-doux: #fdecea;
+  --warn: #b45309;
+
+  /* Barre latérale sombre, tirée du vert de marque (vert très foncé). */
+  --rail-bg: #0e1a15;
+  --rail-text: #cfdad3;
+  --rail-muted: #7e928a;
+  --rail-actif: rgba(255,255,255,.09);
+
+  --ombre: 0 1px 2px rgba(16,24,40,.06), 0 1px 3px rgba(16,24,40,.10);
+  --rayon: 12px;
 }
 
-/* On fixe le thème clair : sans ça, un navigateur (ou une page d'aperçu) réglé
-   en mode sombre repeint tout seul les champs de saisie en foncé, et la barre
-   de recherche devient noire alors que l'app est en clair. */
-:root { color-scheme: light; }
+/* Thème sombre : même structure, autres valeurs. Déclenché par l'attribut
+   data-theme="dark" posé sur <html> (voir 65-theme.js). */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg: #0b1220;
+  --surface: #111c30;
+  --surface-2: #0e1728;
+  --text: #e7edf5;
+  --muted: #93a4ba;
+  --border: #22304a;
+
+  --brand: #2aa87a;
+  --brand-fort: #34c491;
+  --ok: #22c55e;
+  --danger: #f05252;
+  --danger-doux: #3a1d1d;
+  --warn: #f59e0b;
+
+  --rail-bg: #0a1310;
+  --rail-text: #cfe0d8;
+  --rail-muted: #7f948b;
+  --rail-actif: rgba(255,255,255,.08);
+
+  --ombre: 0 1px 2px rgba(0,0,0,.5);
+}
 
 * { box-sizing: border-box; }
 
 html, body {
   margin: 0;
   height: 100%;
-  font-family: "Segoe UI", Roboto, Arial, sans-serif;
-  color: var(--texte);
-  background: var(--fond);
+  font-family: "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 15px;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
 }
 
-a { color: var(--vert-fonce); }
+a { color: var(--brand-fort); }
+h1, h2, h3 { margin: 0; font-weight: 700; letter-spacing: -0.01em; }
 
-.bouton {
-  border: 0;
-  border-radius: 10px;
-  padding: 12px 16px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
+/* ---- Boutons ---- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 9px 14px; border: 1px solid transparent; border-radius: 10px;
+  font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap;
+  background: transparent; color: var(--text);
 }
-.bouton-principal { background: var(--vert); color: #fff; width: 100%; }
-.bouton-principal:hover { background: var(--vert-fonce); }
-.bouton-alerte { background: var(--rouge); color: #fff; width: 100%; }
-.bouton-neutre { background: #e7edf1; color: var(--texte); }
+.btn svg { width: 18px; height: 18px; fill: currentColor; }
+.btn-principal { background: var(--brand); color: #fff; }
+.btn-principal:hover { background: var(--brand-fort); }
+.btn-fantome { background: var(--surface); color: var(--text); border-color: var(--border); }
+.btn-fantome:hover { background: var(--surface-2); }
+.btn-danger { background: var(--danger); color: #fff; }
+.btn-danger:hover { filter: brightness(0.95); }
+.btn-icone { background: var(--surface); border-color: var(--border); padding: 9px; }
+.btn-icone:hover { background: var(--surface-2); }
+.btn-large { width: 100%; padding: 12px; }
 
-.aide { color: var(--gris); font-size: 13px; margin: 6px 0 14px; }
-
-.champ { display: block; margin-bottom: 12px; font-size: 13px; color: var(--gris); }
+/* ---- Champs de saisie ---- */
+.champ { display: block; margin-bottom: 12px; font-size: 13px; color: var(--muted); }
 .champ input {
-  display: block;
-  width: 100%;
-  margin-top: 4px;
-  padding: 10px 12px;
-  font-size: 16px;
-  border: 1px solid var(--bordure);
-  border-radius: 8px;
-  background: #fff;
-  color: var(--texte);
+  display: block; width: 100%; margin-top: 5px; padding: 10px 12px;
+  font-size: 15px; color: var(--text); background: var(--surface);
+  border: 1px solid var(--border); border-radius: 9px;
 }
+.champ input:focus, .topbar-recherche input:focus { outline: 2px solid var(--brand); outline-offset: 1px; }
+
+.aide { color: var(--muted); font-size: 13px; margin: 6px 0 14px; line-height: 1.4; }
