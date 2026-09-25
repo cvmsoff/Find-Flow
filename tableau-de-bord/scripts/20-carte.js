@@ -26,9 +26,16 @@ FindFlow.carte = (function creerCarte() {
     const c = FindFlow.config.centreParDefaut;
     carte = L.map(idElement, { zoomControl: true }).setView([c.lat, c.lng], c.zoom);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '© OpenStreetMap'
+    /* FOND DE CARTE : on n'utilise PAS les serveurs publics d'OpenStreetMap.
+       Leur politique d'usage renvoie une erreur 403 (« Access blocked ») dès
+       qu'une appli les appelle sans en-têtes conformes — ce qui arrive quand on
+       ouvre la page depuis un simple fichier. On passe par Carto, qui autorise
+       cet usage, sans clé, pour l'aperçu et la démonstration. Pour le vrai
+       produit en clientèle, on branchera un fournisseur avec un compte dédié. */
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png', {
+      maxZoom: 20,
+      subdomains: 'abcd',
+      attribution: '© OpenStreetMap, © CARTO'
     }).on('tileerror', montrerBandeauHorsLigne).addTo(carte);
 
     return carte;
