@@ -39,6 +39,11 @@ var FindFlow = window.FindFlow || (window.FindFlow = {});
     function brancherActionsHaut() {
       lier('btn-actualiser', function () { FindFlow.stockage.rafraichir(); });
       lier('btn-voir-tout', function () { FindFlow.carte.ajusterSurTous(dernierEtat); });
+      lier('btn-carte-style', function () {
+        const style = FindFlow.carte.basculerStyle();
+        const b = document.getElementById('btn-carte-style');
+        if (b) b.title = (style === 'satellite') ? 'Vue satellite (cliquer pour Plan)' : 'Plan (cliquer pour Satellite)';
+      });
       lier('btn-ajouter-haut', FindFlow.appairage.ouvrir);
       lier('nav-ajouter', FindFlow.appairage.ouvrir);
       /* « Tableau de bord » : on referme les volets pour revenir à la vue carte. */

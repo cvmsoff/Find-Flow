@@ -23,6 +23,7 @@ var FindFlow = window.FindFlow || (window.FindFlow = {});
     brancherOnglets();
     brancherReglages();
     lier('btn-voir-tout', function () { FindFlow.carte.ajusterSurTous(etat); });
+    lier('btn-carte-style', function () { FindFlow.carte.basculerStyle(); });
 
     FindFlow.stockage.ecouter(function (appareils) {
       etat = appareils;

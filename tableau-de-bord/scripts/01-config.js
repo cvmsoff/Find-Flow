@@ -29,7 +29,10 @@ FindFlow.config = {
     cleCarte: '',
     /* Configuration Firebase (le bloc du projet), collée par l'utilisateur.
        Reste sur le poste, change d'un client à l'autre. Vide = données de démo. */
-    configFirebase: ''
+    configFirebase: '',
+    /* Style de carte : 'plan' (rues) ou 'satellite' (image réelle + noms).
+       La vue satellite aide à reconnaître un lieu précis. */
+    styleCarte: 'plan'
   },
 
   /* Où se centre la carte au démarrage quand aucun appareil n'a encore de

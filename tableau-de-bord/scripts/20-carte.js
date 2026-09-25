@@ -48,13 +48,18 @@ FindFlow.carte = (function creerCarte() {
     if (!carte) return;
     if (coucheFond) { carte.removeLayer(coucheFond); coucheFond = null; }
 
-    const cle = (FindFlow.reglages.lire().cleCarte || '').trim();
+    const reglages = FindFlow.reglages.lire();
+    const cle = (reglages.cleCarte || '').trim();
     if (cle) {
-      /* Le style « openstreetmap » de MapTiler = l'aspect OpenStreetMap classique.
-         La clé voyage dans l'adresse de la tuile ; elle vient des réglages, pas
-         du code. */
+      /* Deux styles MapTiler selon le réglage :
+         - 'satellite' -> style « hybrid » : l'image réelle AVEC les noms de rues,
+           l'équivalent gratuit de la vue satellite de Google, utile pour
+           reconnaître un lieu précis ;
+         - sinon -> 'openstreetmap' : le plan classique.
+         La clé voyage dans l'adresse de la tuile ; elle vient des réglages. */
+      const style = reglages.styleCarte === 'satellite' ? 'hybrid' : 'openstreetmap';
       coucheFond = L.tileLayer(
-        'https://api.maptiler.com/maps/openstreetmap/{z}/{x}/{y}.jpg?key=' + encodeURIComponent(cle),
+        'https://api.maptiler.com/maps/' + style + '/{z}/{x}/{y}.jpg?key=' + encodeURIComponent(cle),
         Object.assign({ attribution: '© OpenStreetMap contributors, © MapTiler' }, optionsTuiles()));
     } else {
       /* Fond de secours Esri (sans clé). ATTENTION : Esri attend {z}/{y}/{x}
@@ -232,8 +237,20 @@ FindFlow.carte = (function creerCarte() {
       .catch(versLigneDroite);
   }
 
+  /* Bascule Plan <-> Satellite et repose le fond aussitôt. Renvoie le nouveau
+     style pour que le bouton mette à jour son libellé. */
+  function basculerStyle() {
+    const r = FindFlow.reglages.lire();
+    r.styleCarte = r.styleCarte === 'satellite' ? 'plan' : 'satellite';
+    FindFlow.reglages.enregistrer(r);
+    installerFond();
+    return r.styleCarte;
+  }
+  function styleActuel() { return FindFlow.reglages.lire().styleCarte === 'satellite' ? 'satellite' : 'plan'; }
+
   return {
     initialiser, afficher, centrerSur, montrerSelection, effacerSelection,
-    ajusterSurTous, tracerItineraire, effacerItineraire, rafraichirFond: installerFond
+    ajusterSurTous, tracerItineraire, effacerItineraire,
+    basculerStyle, styleActuel, rafraichirFond: installerFond
   };
 })();

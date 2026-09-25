@@ -52,7 +52,9 @@ FindFlow.aPropos = (function creerAPropos() {
   }
 
   function enregistrerReglages() {
-    const reglages = {
+    /* On part des réglages existants pour ne pas effacer ceux qui ne sont pas
+       dans ce formulaire (ex. le style de carte réglé par le bouton). */
+    const reglages = Object.assign(FindFlow.reglages.lire(), {
       nomEntreprise: lire('reg-nom') || FindFlow.config.reglagesParDefaut.nomEntreprise,
       adresse: lire('reg-adresse'),
       telephones: lire('reg-telephones'),
@@ -61,7 +63,7 @@ FindFlow.aPropos = (function creerAPropos() {
       compteContribuable: lire('reg-contribuable'),
       cleCarte: lire('reg-cle-carte'),
       configFirebase: lire('reg-firebase')
-    };
+    });
     const avant = FindFlow.reglages.lire().configFirebase || '';
     const ok = FindFlow.reglages.enregistrer(reglages);
     const info = document.getElementById('reglages-message');
