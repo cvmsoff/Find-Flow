@@ -1,0 +1,75 @@
+# Construit l'APK de l'AGENT Find-Flow (l'app qu'on installe sur un appareil
+# à suivre : elle envoie le GPS vers ton compte). Compilé par GitHub.
+#
+# Récupérer l'APK : onglet Actions -> « Construire l'APK Agent Find-Flow » ->
+# une exécution -> artefact « find-flow-agent-apk » -> app-debug.apk.
+
+name: Construire l'APK Agent Find-Flow
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches:
+      - claude/new-session-2hv28w
+    paths:
+      - 'agent/**'
+      - 'tableau-de-bord/scripts/08-stockage-firebase.js'
+      - 'outils/preparer-agent.js'
+      - 'outils/ajouter-permissions-agent.js'
+      - 'capacitor.config.agent.json'
+      - '.github/workflows/construire-apk-agent.yml'
+
+jobs:
+  apk-agent:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v4
+
+      - name: Installer Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Installer Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Installer les dépendances
+        run: npm install
+
+      - name: Ajouter le plugin de localisation (GPS natif)
+        run: npm install @capacitor/geolocation@^6
+
+      - name: Recopier les bibliothèques (vendor)
+        run: npm run sync-vendor
+
+      - name: Préparer l'agent autonome (agent-dist/)
+        run: node outils/preparer-agent.js
+
+      - name: Utiliser la configuration Capacitor de l'agent
+        run: cp capacitor.config.agent.json capacitor.config.json
+
+      - name: Créer le projet Android
+        run: npx cap add android
+
+      - name: Ajouter les permissions de localisation
+        run: node outils/ajouter-permissions-agent.js
+
+      - name: Synchroniser l'app dans le projet Android
+        run: npx cap sync android
+
+      - name: Compiler l'APK de débogage
+        run: |
+          cd android
+          chmod +x ./gradlew
+          ./gradlew assembleDebug --no-daemon
+
+      - name: Mettre l'APK à télécharger
+        uses: actions/upload-artifact@v4
+        with:
+          name: find-flow-agent-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error

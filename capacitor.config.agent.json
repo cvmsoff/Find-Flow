@@ -1,0 +1,6 @@
+{
+  "appId": "com.camslab.findflow.agent",
+  "appName": "Find-Flow Agent",
+  "webDir": "agent-dist",
+  "bundledWebRuntime": false
+}

@@ -29,6 +29,27 @@ FindFlow.stockageFirebase = (function creerStockageFirebase() {
   let deleguer = null;       // si non nul, on repasse tout au module de démo
   let initLancee = false;
 
+  /* Suit la position, en préférant le GPS NATIF Android quand l'app tourne dans
+     Capacitor (plus fiable, permission demandée proprement), sinon le GPS du
+     navigateur. Renvoie un objet { stop } pour arrêter le suivi. */
+  function demarrerVeilleGPS(onPos, onErr) {
+    const cap = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Geolocation;
+    if (cap) {
+      let idPromise = null;
+      cap.requestPermissions().catch(function () {}).then(function () {
+        idPromise = cap.watchPosition({ enableHighAccuracy: true, timeout: 20000 }, function (pos, err) {
+          if (err) { onErr(err); return; }
+          if (pos) onPos(pos);
+        });
+      });
+      return { stop: function () { if (idPromise) idPromise.then(function (id) { cap.clearWatch({ id: id }); }); } };
+    }
+    if (!navigator.geolocation) { onErr(new Error('Ce téléphone ne donne pas sa position.')); return { stop: function () {} }; }
+    const wid = navigator.geolocation.watchPosition(onPos, onErr,
+      { enableHighAccuracy: true, maximumAge: 4000, timeout: 20000 });
+    return { stop: function () { navigator.geolocation.clearWatch(wid); } };
+  }
+
   /* Charge un script vendored (une seule fois) et attend qu'il soit prêt. */
   function chargerScript(src) {
     return new Promise(function (resoudre, rejeter) {
@@ -259,19 +280,18 @@ FindFlow.stockageFirebase = (function creerStockageFirebase() {
           estAMoi: true, mode: 'normal'
         }, { merge: true });
 
-        if (!navigator.geolocation) { throw new Error('Ce téléphone ne donne pas sa position.'); }
-        veille = navigator.geolocation.watchPosition(function (pos) {
+        const surPos = function (pos) {
           const position = {
             lat: pos.coords.latitude, lng: pos.coords.longitude,
             precision_m: Math.round(pos.coords.accuracy || 0)
           };
           ref.set({ position: position, derniereMaj: new Date().toISOString() }, { merge: true });
           if (surPosition) surPosition(position);
-        }, function (err) {
-          if (surPosition) surPosition({ erreur: err && err.message });
-        }, { enableHighAccuracy: true, maximumAge: 4000, timeout: 20000 });
+        };
+        const surErr = function (err) { if (surPosition) surPosition({ erreur: (err && err.message) || 'localisation refusée' }); };
+        veille = demarrerVeilleGPS(surPos, surErr);
       });
-      return function arreter() { if (veille !== null && navigator.geolocation) navigator.geolocation.clearWatch(veille); };
+      return function arreter() { if (veille && veille.stop) veille.stop(); };
     },
 
     /* Se déconnecter du compte (utile pour changer de compte). */
