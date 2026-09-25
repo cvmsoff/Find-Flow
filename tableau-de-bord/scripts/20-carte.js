@@ -26,16 +26,16 @@ FindFlow.carte = (function creerCarte() {
     const c = FindFlow.config.centreParDefaut;
     carte = L.map(idElement, { zoomControl: true }).setView([c.lat, c.lng], c.zoom);
 
-    /* FOND DE CARTE : on n'utilise PAS les serveurs publics d'OpenStreetMap.
-       Leur politique d'usage renvoie une erreur 403 (« Access blocked ») dès
-       qu'une appli les appelle sans en-têtes conformes — ce qui arrive quand on
-       ouvre la page depuis un simple fichier. On passe par Carto, qui autorise
-       cet usage, sans clé, pour l'aperçu et la démonstration. Pour le vrai
-       produit en clientèle, on branchera un fournisseur avec un compte dédié. */
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png', {
-      maxZoom: 20,
-      subdomains: 'abcd',
-      attribution: '© OpenStreetMap, © CARTO'
+    /* FOND DE CARTE : on n'utilise ni les serveurs publics d'OpenStreetMap
+       (qui renvoient 403 « Access blocked » à une appli), ni Carto (qui réclame
+       désormais une clé). On passe par Esri, qui sert un fond de carte SANS clé,
+       utilisable depuis un simple fichier — parfait pour l'aperçu et la démo.
+       ATTENTION : Esri attend l'ordre {z}/{y}/{x} (le y AVANT le x) ; inversés,
+       les tuiles s'afficheraient au mauvais endroit. Pour la mise en clientèle,
+       on branchera un fournisseur avec un compte dédié. */
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+      maxZoom: 19,
+      attribution: 'Fond de carte © Esri'
     }).on('tileerror', montrerBandeauHorsLigne).addTo(carte);
 
     return carte;
