@@ -8,14 +8,21 @@
   "private": true,
   "scripts": {
     "sync-vendor": "node outils/sync-vendor.js",
+    "preparer-mobile": "node outils/preparer-mobile.js",
     "test": "node tests/lancer-les-tests.js"
   },
   "dependencies": {
     "firebase": "^12.19.0",
     "leaflet": "1.9.4"
   },
+  "devDependencies": {
+    "@capacitor/cli": "^6.1.2",
+    "@capacitor/core": "^6.1.2",
+    "@capacitor/android": "^6.1.2"
+  },
   "//dependencies": {
     "leaflet": "La carte du tableau de bord. Installée par npm puis RECOPIÉE dans tableau-de-bord/vendor/ par `npm run sync-vendor` — le code livré ne lit jamais node_modules, et rien n'est chargé depuis un CDN.",
-    "firebase": "Le serveur (base temps réel + hors ligne + authentification). On recopie ses versions « compat » (UMD) dans vendor/firebase/ via `npm run sync-vendor` ; elles s'utilisent avec de simples <script>, sans étape de compilation."
+    "firebase": "Le serveur (base temps réel + hors ligne + authentification). On recopie ses versions « compat » (UMD) dans vendor/firebase/ via `npm run sync-vendor` ; elles s'utilisent avec de simples <script>, sans étape de compilation.",
+    "@capacitor/*": "Emballe l'app mobile (dossier mobile-dist/) en application Android (APK). Sert UNIQUEMENT à la compilation ; le code de l'app reste du HTML/CSS/JS ordinaire."
   }
 }

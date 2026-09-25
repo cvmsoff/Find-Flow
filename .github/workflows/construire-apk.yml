@@ -1,0 +1,64 @@
+# Construit l'APK Android de Find-Flow sur les serveurs de GitHub
+# (qui disposent du SDK Android), puis met l'APK à télécharger.
+#
+# Comment s'en servir : onglet « Actions » du dépôt -> « Construire l'APK
+# Find-Flow » -> « Run workflow ». À la fin, ouvre l'exécution et télécharge
+# l'artefact « find-flow-apk » : dedans, app-debug.apk.
+#
+# C'est un APK de DÉBOGAGE (signé avec la clé de test Android) : parfait pour
+# l'installer toi-même et essayer. Un APK signé pour distribution large viendra
+# ensuite, avec ta propre clé.
+
+name: Construire l'APK Find-Flow
+
+on:
+  workflow_dispatch: {}   # lancement manuel depuis l'onglet Actions
+  push:
+    branches:
+      - claude/new-session-2hv28w   # construit l'APK à chaque envoi sur cette branche
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v4
+
+      - name: Installer Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Installer Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Installer les dépendances
+        run: npm install
+
+      - name: Recopier les bibliothèques (vendor)
+        run: npm run sync-vendor
+
+      - name: Préparer l'app mobile autonome (mobile-dist/)
+        run: npm run preparer-mobile
+
+      - name: Créer le projet Android
+        run: npx cap add android
+
+      - name: Synchroniser l'app dans le projet Android
+        run: npx cap sync android
+
+      - name: Compiler l'APK de débogage
+        run: |
+          cd android
+          chmod +x ./gradlew
+          ./gradlew assembleDebug --no-daemon
+
+      - name: Mettre l'APK à télécharger
+        uses: actions/upload-artifact@v4
+        with:
+          name: find-flow-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error

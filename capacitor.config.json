@@ -1,0 +1,6 @@
+{
+  "appId": "com.camslab.findflow",
+  "appName": "Find-Flow",
+  "webDir": "mobile-dist",
+  "bundledWebRuntime": false
+}
