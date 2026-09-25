@@ -1,0 +1,46 @@
+/* RÈGLES DE SÉCURITÉ FIRESTORE — Find-Flow — Étape 01 (base).
+
+   CE QUE CETTE ÉTAPE MET EN PLACE :
+   - Chaque appareil appartient à UN compte (le patron), via le champ `compte`
+     qui contient l'identifiant de son compte.
+   - Personne ne peut lire ni écrire les appareils d'un autre compte. La règle
+     est appliquée PAR LE SERVEUR, pas seulement cachée dans l'écran : même
+     quelqu'un qui contournerait l'app se ferait refuser.
+   - Il faut être connecté (auth) pour toucher à quoi que ce soit.
+
+   CE QUE ÇA NE CASSE PAS :
+   - L'app continue de lire/écrire normalement les appareils du compte connecté.
+   - Les positions de démonstration ne sont pas concernées (elles restent en
+     local tant que le tableau de bord n'est pas branché sur Firebase).
+
+   À VENIR (étapes suivantes, fichiers séparés) :
+   - Rôles (administrateur / responsable / employé).
+   - Droit d'écriture réservé à l'agent pour la position, en lecture seule côté
+     tableau de bord pour certains champs. */
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /* Un appareil = un document dans la collection « appareils ».
+       On le lit/écrit seulement si on est connecté ET que l'appareil porte
+       notre propre identifiant de compte. */
+    match /appareils/{appareilId} {
+      allow read, update, delete: if request.auth != null
+        && request.auth.uid == resource.data.compte;
+
+      allow create: if request.auth != null
+        && request.auth.uid == request.resource.data.compte;
+    }
+
+    /* Journal d'activité : qui a fait quoi, quand. En écriture seule pour le
+       compte concerné ; lecture réservée à ce même compte. */
+    match /journal/{ligneId} {
+      allow read: if request.auth != null
+        && request.auth.uid == resource.data.compte;
+      allow create: if request.auth != null
+        && request.auth.uid == request.resource.data.compte;
+    }
+  }
+}
