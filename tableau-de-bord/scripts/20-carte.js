@@ -25,20 +25,46 @@ FindFlow.carte = (function creerCarte() {
   function initialiser(idElement) {
     const c = FindFlow.config.centreParDefaut;
     carte = L.map(idElement, { zoomControl: true }).setView([c.lat, c.lng], c.zoom);
-
-    /* FOND DE CARTE : on n'utilise ni les serveurs publics d'OpenStreetMap
-       (qui renvoient 403 « Access blocked » à une appli), ni Carto (qui réclame
-       désormais une clé). On passe par Esri, qui sert un fond de carte SANS clé,
-       utilisable depuis un simple fichier — parfait pour l'aperçu et la démo.
-       ATTENTION : Esri attend l'ordre {z}/{y}/{x} (le y AVANT le x) ; inversés,
-       les tuiles s'afficheraient au mauvais endroit. Pour la mise en clientèle,
-       on branchera un fournisseur avec un compte dédié. */
-    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
-      maxZoom: 19,
-      attribution: 'Fond de carte © Esri'
-    }).on('tileerror', montrerBandeauHorsLigne).addTo(carte);
-
+    installerFond();
     return carte;
+  }
+
+  /* Pose (ou repose) le fond de carte selon les réglages :
+     - une clé MapTiler est saisie  -> la carte OpenStreetMap (MapTiler) ;
+     - sinon                        -> un fond de secours Esri, sans clé, pour
+       ne jamais laisser l'utilisateur devant une carte vide.
+     On peut la rappeler après que l'utilisateur a collé sa clé, sans recharger
+     la page : on retire l'ancien fond et on met le nouveau. */
+  let coucheFond = null;
+  function installerFond() {
+    if (!carte) return;
+    if (coucheFond) { carte.removeLayer(coucheFond); coucheFond = null; }
+
+    const cle = (FindFlow.reglages.lire().cleCarte || '').trim();
+    if (cle) {
+      /* Le style « openstreetmap » de MapTiler = l'aspect OpenStreetMap classique.
+         La clé voyage dans l'adresse de la tuile ; elle vient des réglages, pas
+         du code. */
+      coucheFond = L.tileLayer(
+        'https://api.maptiler.com/maps/openstreetmap/{z}/{x}/{y}.jpg?key=' + encodeURIComponent(cle), {
+          maxZoom: 19,
+          attribution: '© OpenStreetMap contributors, © MapTiler'
+        });
+    } else {
+      /* Fond de secours Esri (sans clé). ATTENTION : Esri attend {z}/{y}/{x}
+         (le y AVANT le x) ; inversés, les tuiles seraient au mauvais endroit. */
+      coucheFond = L.tileLayer(
+        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+          maxZoom: 19,
+          attribution: 'Fond de carte © Esri (secours — ajoute ta clé pour OpenStreetMap)'
+        });
+    }
+    /* Nouveau fond = nouvel essai : on cache le bandeau « hors ligne » ; il
+       reviendra tout seul si les tuiles échouent encore. */
+    const bandeau = document.getElementById('carte-hors-ligne');
+    if (bandeau) bandeau.hidden = true;
+
+    coucheFond.on('tileerror', montrerBandeauHorsLigne).addTo(carte);
   }
 
   function montrerBandeauHorsLigne() {
@@ -124,5 +150,8 @@ FindFlow.carte = (function creerCarte() {
     }
   }
 
-  return { initialiser, afficher, centrerSur, montrerSelection, effacerSelection };
+  return {
+    initialiser, afficher, centrerSur, montrerSelection, effacerSelection,
+    rafraichirFond: installerFond
+  };
 })();

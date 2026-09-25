@@ -45,6 +45,7 @@ FindFlow.aPropos = (function creerAPropos() {
     valeur('reg-email', r.email);
     valeur('reg-rccm', r.rccm);
     valeur('reg-contribuable', r.compteContribuable);
+    valeur('reg-cle-carte', r.cleCarte);
   }
 
   function enregistrerReglages() {
@@ -54,7 +55,8 @@ FindFlow.aPropos = (function creerAPropos() {
       telephones: lire('reg-telephones'),
       email: lire('reg-email'),
       rccm: lire('reg-rccm'),
-      compteContribuable: lire('reg-contribuable')
+      compteContribuable: lire('reg-contribuable'),
+      cleCarte: lire('reg-cle-carte')
     };
     const ok = FindFlow.reglages.enregistrer(reglages);
     const info = document.getElementById('reglages-message');
@@ -65,6 +67,9 @@ FindFlow.aPropos = (function creerAPropos() {
         : 'Impossible d’enregistrer sur ce poste (stockage bloqué). Réessaie ou change de navigateur.';
     }
     appliquerNomClient();
+    /* La clé carte a pu changer : on repose le fond de carte tout de suite,
+       sans obliger l'utilisateur à recharger la page. */
+    if (FindFlow.carte && FindFlow.carte.rafraichirFond) FindFlow.carte.rafraichirFond();
   }
 
   /* Le nom du client s'affiche dans l'en-tête et dans la ligne de licence

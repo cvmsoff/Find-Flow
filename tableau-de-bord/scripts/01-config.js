@@ -22,7 +22,11 @@ FindFlow.config = {
     telephones: '',
     email: '',
     rccm: '',
-    compteContribuable: ''
+    compteContribuable: '',
+    /* Clé du fournisseur de carte (MapTiler), saisie par l'utilisateur dans les
+       réglages. Elle reste sur le poste — jamais écrite en dur ici, jamais
+       poussée dans le dépôt. Vide = on retombe sur un fond de carte de secours. */
+    cleCarte: ''
   },
 
   /* Où se centre la carte au démarrage quand aucun appareil n'a encore de
