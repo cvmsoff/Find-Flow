@@ -27,6 +27,10 @@ FindFlow.details = (function creerDetails() {
     idAffiche = id;
     effacerRoute(); // on repart sans l'itinéraire de l'appareil précédent
     dessiner();
+    /* On centre UNE SEULE FOIS, au moment du clic. Ensuite l'utilisateur se
+       déplace librement : on ne recentre plus tout seul à chaque rafraîchissement
+       (c'est ça qui « ramenait » la carte sans arrêt). Re-cliquer recentre. */
+    if (FindFlow.carte) FindFlow.carte.centrerSur(trouver());
     const panneau = document.getElementById('details');
     if (panneau) panneau.hidden = false;
   }
@@ -34,7 +38,9 @@ FindFlow.details = (function creerDetails() {
   function masquer() {
     idAffiche = null;
     if (FindFlow.carte) FindFlow.carte.effacerSelection();
-    effacerRoute();
+    /* On NE touche PAS à l'itinéraire : fermer la fiche garde la route affichée,
+       pour pouvoir continuer à la suivre. Elle s'efface quand on en trace une
+       autre, ou quand on ouvre un autre appareil. */
     const panneau = document.getElementById('details');
     if (panneau) panneau.hidden = true;
   }
@@ -79,10 +85,10 @@ FindFlow.details = (function creerDetails() {
       blocHistorique(a);
 
     brancherActions(a);
-    if (FindFlow.carte) {
-      FindFlow.carte.centrerSur(a);
-      FindFlow.carte.montrerSelection(a); // trace + clôture sur la carte
-    }
+    /* On met à jour la trace et la clôture, mais on NE recentre PAS ici :
+       dessiner() est rappelé à chaque rafraîchissement, et recentrer ici
+       ramènerait la carte sans cesse. Le centrage se fait au clic (ouvrir). */
+    if (FindFlow.carte) FindFlow.carte.montrerSelection(a);
   }
 
   /* La photo de l'appareil : un aperçu rond + le bouton pour la changer.

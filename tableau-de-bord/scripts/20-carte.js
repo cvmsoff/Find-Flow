@@ -198,10 +198,15 @@ FindFlow.carte = (function creerCarte() {
     const dessiner = function (pointsLatLng, infos) {
       coucheItineraire = L.layerGroup().addTo(carte);
       L.polyline(pointsLatLng, { color: '#7c5cff', weight: 6, opacity: 0.85 }).addTo(coucheItineraire);
+      /* Départ (« Moi ») et arrivée (l'appareil), bien visibles, pour ne pas
+         perdre le sens de l'itinéraire. */
       L.circleMarker([origine.lat, origine.lng], {
-        radius: 7, color: '#fff', weight: 2, fillColor: '#7c5cff', fillOpacity: 1
-      }).bindTooltip('Moi', { direction: 'top' }).addTo(coucheItineraire);
-      carte.fitBounds(pointsLatLng, { padding: [60, 60] });
+        radius: 8, color: '#fff', weight: 3, fillColor: '#7c5cff', fillOpacity: 1
+      }).bindTooltip('Moi (départ)', { direction: 'top', permanent: false }).addTo(coucheItineraire);
+      L.circleMarker([dest.lat, dest.lng], {
+        radius: 8, color: '#fff', weight: 3, fillColor: '#16a34a', fillOpacity: 1
+      }).bindTooltip('Appareil (arrivée)', { direction: 'top', permanent: false }).addTo(coucheItineraire);
+      carte.fitBounds(pointsLatLng, { padding: [70, 70] });
       if (quandPret) quandPret(infos);
     };
 
