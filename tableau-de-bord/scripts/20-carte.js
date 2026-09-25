@@ -100,12 +100,12 @@ FindFlow.carte = (function creerCarte() {
          l'appareil. Nom et initiales sont échappés : un nom piégé s'affiche,
          il ne s'exécute pas. */
       const nomSur = FindFlow.format.echapper(a.nom);
+      const av = FindFlow.format.contenuAvatar(a);
       const icone = L.divIcon({
         className: '',
         html:
           '<div class="marqueur ' + classeStatut(a) + '">' +
-            '<div class="marqueur-avatar" style="background:' + FindFlow.format.couleurAvatar(a.id) + '">' +
-              FindFlow.format.initiales(a.nom) + '</div>' +
+            '<div class="marqueur-avatar" style="background:' + av.fond + '">' + av.html + '</div>' +
             '<div class="marqueur-nom">' + nomSur + '</div>' +
           '</div>',
         iconSize: [40, 40], iconAnchor: [20, 20]

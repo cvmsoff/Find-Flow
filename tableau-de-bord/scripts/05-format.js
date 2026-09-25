@@ -83,5 +83,20 @@ FindFlow.format = {
     const s = String(id || '');
     for (let i = 0; i < s.length; i++) somme += s.charCodeAt(i);
     return palette[somme % palette.length];
+  },
+
+  /* Le contenu d'un avatar : la PHOTO de l'appareil si l'utilisateur en a mis
+     une, sinon les initiales sur fond coloré. On renvoie de quoi remplir aussi
+     bien la pastille de la liste que le marqueur de la carte, pour que les deux
+     montrent exactement la même chose. La photo est une image locale (data URL)
+     choisie par l'utilisateur — jamais chargée depuis internet. */
+  contenuAvatar(appareil) {
+    if (appareil && appareil.photo) {
+      return { fond: 'transparent', html: '<img class="avatar-img" src="' + appareil.photo + '" alt="">' };
+    }
+    return {
+      fond: FindFlow.format.couleurAvatar(appareil && appareil.id),
+      html: FindFlow.format.initiales(appareil && appareil.nom)
+    };
   }
 };

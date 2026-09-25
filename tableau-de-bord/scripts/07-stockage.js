@@ -112,6 +112,17 @@ FindFlow.stockage = (function creerStockage() {
       return Promise.resolve(true);
     },
 
+    /* Pose ou retire la photo d'un appareil (image locale déjà réduite, ou null
+       pour revenir aux initiales). Avec le vrai serveur, la photo sera stockée
+       à côté de l'appareil ; ici elle vit dans cet état en mémoire. */
+    definirPhoto(id, photo) {
+      appareils = appareils.map(function (a) {
+        return a.id === id ? Object.assign({}, a, { photo: photo || null }) : a;
+      });
+      notifier();
+      return Promise.resolve(true);
+    },
+
     dernierEtat() {
       return appareils.map((a) => JSON.parse(JSON.stringify(a)));
     },

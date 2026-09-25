@@ -62,9 +62,10 @@ FindFlow.liste = (function creerListe() {
             (alertes.length > 1 ? ' +' + (alertes.length - 1) : '') + '</span>'
         : '';
 
-      /* Avatar rond coloré (le même appareil garde sa couleur) + anneau de statut. */
-      const avatar = '<span class="avatar" style="background:' + FindFlow.format.couleurAvatar(a.id) + '">' +
-        FindFlow.format.initiales(a.nom) + '</span>';
+      /* Avatar rond : photo si l'appareil en a une, sinon initiales colorées.
+         L'anneau (couleur de statut) est porté par la classe de la carte. */
+      const av = FindFlow.format.contenuAvatar(a);
+      const avatar = '<span class="avatar" style="background:' + av.fond + '">' + av.html + '</span>';
       const batt = (typeof a.batterie === 'number')
         ? '<span class="appareil-batt">' + Math.round(a.batterie) + ' %</span>' : '';
 

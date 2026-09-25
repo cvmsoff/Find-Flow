@@ -53,6 +53,7 @@ FindFlow.details = (function creerDetails() {
 
     corps.innerHTML =
       blocAlertes(a) +
+      blocPhoto(a) +
       ligne('Propriétaire', ech(a.proprietaire)) +
       ligne('Type', FindFlow.format.typeLisible(a.type)) +
       ligne('État', a.mode === 'vole' ? 'VOLÉ' : (enLigne ? 'En ligne' : 'Hors ligne')) +
@@ -72,6 +73,56 @@ FindFlow.details = (function creerDetails() {
       FindFlow.carte.centrerSur(a);
       FindFlow.carte.montrerSelection(a); // trace + clôture sur la carte
     }
+  }
+
+  /* La photo de l'appareil : un aperçu rond + le bouton pour la changer.
+     Une vraie photo (secrétaire, PC, logo) rend la carte bien plus lisible que
+     des initiales — c'est l'esprit d'un traceur façon Life360. */
+  function blocPhoto(a) {
+    const av = FindFlow.format.contenuAvatar(a);
+    return '<div class="bloc-photo">' +
+      '<span class="avatar avatar-grand" style="background:' + av.fond + '">' + av.html + '</span>' +
+      '<div class="actions-photo">' +
+        '<button id="btn-photo" class="pilule pilule-petite">' +
+          (a.photo ? 'Changer la photo' : 'Ajouter une photo') + '</button>' +
+        (a.photo ? '<button id="btn-photo-retirer" class="pilule pilule-petite">Retirer</button>' : '') +
+      '</div>' +
+    '</div>';
+  }
+
+  /* Ouvre le sélecteur de fichier, réduit l'image et l'enregistre. On réduit
+     AVANT de stocker : une photo de téléphone fait plusieurs Mo, inutile de
+     garder tout ça pour une pastille de 40 px — on la ramène à 160 px. */
+  function choisirPhoto(a) {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.addEventListener('change', function () {
+      const fichier = input.files && input.files[0];
+      if (!fichier) return;
+      const lecteur = new FileReader();
+      lecteur.onload = function () { reduireImage(lecteur.result, 160, function (petite) {
+        FindFlow.stockage.definirPhoto(a.id, petite);
+      }); };
+      lecteur.readAsDataURL(fichier);
+    });
+    input.click();
+  }
+
+  function reduireImage(dataUrl, cote, quandPret) {
+    const img = new Image();
+    img.onload = function () {
+      /* On recadre au centre en carré, puis on dessine à la taille voulue. */
+      const min = Math.min(img.width, img.height);
+      const sx = (img.width - min) / 2;
+      const sy = (img.height - min) / 2;
+      const c = document.createElement('canvas');
+      c.width = cote; c.height = cote;
+      c.getContext('2d').drawImage(img, sx, sy, min, min, 0, 0, cote, cote);
+      quandPret(c.toDataURL('image/jpeg', 0.82));
+    };
+    img.onerror = function () { /* fichier illisible : on ne change rien */ };
+    img.src = dataUrl;
   }
 
   /* En haut de la fiche : les alertes, en clair. Rien si tout va bien. */
@@ -139,6 +190,11 @@ FindFlow.details = (function creerDetails() {
     if (poser) poser.onclick = function () { poserZone(a); };
     const retirer = document.getElementById('bouton-zone-retirer');
     if (retirer) retirer.onclick = function () { retirerZone(a); };
+
+    const photo = document.getElementById('btn-photo');
+    if (photo) photo.onclick = function () { choisirPhoto(a); };
+    const photoRetirer = document.getElementById('btn-photo-retirer');
+    if (photoRetirer) photoRetirer.onclick = function () { FindFlow.stockage.definirPhoto(a.id, null); };
   }
 
   function basculerVol(a) {
