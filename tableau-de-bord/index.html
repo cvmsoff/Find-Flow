@@ -30,7 +30,7 @@
     <div class="compteurs">
       <span class="compteur"><b id="compteur-total">0</b> appareils</span>
       <span class="compteur en-ligne"><b id="compteur-en-ligne">0</b> en ligne</span>
-      <span class="compteur voles"><b id="compteur-voles">0</b> volés</span>
+      <span class="compteur alertes"><b id="compteur-alertes">0</b> alertes</span>
     </div>
     <button class="bouton bouton-neutre" id="ouvrir-infos">Infos & réglages</button>
   </header>
@@ -58,6 +58,7 @@
       <button class="bouton-fermer" id="details-fermer" aria-label="Fermer">×</button>
     </div>
     <div id="details-corps"></div>
+    <button id="bouton-itineraire" class="bouton bouton-neutre">Ouvrir l'itinéraire vers l'appareil</button>
     <button id="bouton-vol" class="bouton bouton-alerte">Signaler cet appareil volé</button>
   </aside>
 
@@ -92,11 +93,13 @@
   <!-- Scripts chargés dans l'ordre. Un fichier = un sujet. -->
   <script src="vendor/leaflet/leaflet.js"></script>
   <script src="scripts/01-config.js"></script>
+  <script src="scripts/04-geo.js"></script>
   <script src="scripts/05-format.js"></script>
   <script src="scripts/06-donnees-demo.js"></script>
   <script src="scripts/07-stockage.js"></script>
   <script src="scripts/20-carte.js"></script>
   <script src="scripts/30-liste.js"></script>
+  <script src="scripts/50-alertes.js"></script>
   <script src="scripts/40-details.js"></script>
   <script src="scripts/90-a-propos.js"></script>
   <script src="scripts/99-app.js"></script>

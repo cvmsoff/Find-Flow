@@ -32,7 +32,20 @@ FindFlow.config = {
   /* Au-delà de ce délai sans nouvelle position, un appareil est considéré
      « hors ligne » à l'écran. Cinq minutes : assez pour tolérer une coupure
      réseau courte sans faire clignoter le statut à chaque seconde. */
-  secondesAvantHorsLigne: 5 * 60
+  secondesAvantHorsLigne: 5 * 60,
+
+  /* En dessous de ce niveau, on alerte « batterie faible » : un appareil qui
+     va s'éteindre est un appareil qu'on risque de perdre de vue. */
+  seuilBatterieFaible: 20,
+
+  /* Rayon proposé par défaut quand on pose une clôture géographique, en mètres.
+     200 m : la taille d'une cour d'entreprise ou d'un pâté de maisons. */
+  rayonZoneParDefaut: 200,
+
+  /* Nombre de positions gardées dans l'historique d'un appareil. On garde le
+     trajet récent, pas toute la vie de l'appareil : c'est ce qui aide à
+     retrouver un appareil, pas à ficher les allées et venues d'une personne. */
+  longueurHistorique: 20
 };
 
 /* Lecture/écriture des réglages d'entreprise sur le poste.

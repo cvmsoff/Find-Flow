@@ -6,7 +6,9 @@
 
 const bancs = [
   require('./01-format.test.js'),
-  require('./02-stockage.test.js')
+  require('./02-stockage.test.js'),
+  require('./03-geo.test.js'),
+  require('./04-alertes.test.js')
 ];
 
 async function tout() {

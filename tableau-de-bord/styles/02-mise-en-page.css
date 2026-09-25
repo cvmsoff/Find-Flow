@@ -26,7 +26,7 @@
 .compteurs { display: flex; gap: 14px; margin-left: auto; font-size: 14px; }
 .compteur b { font-size: 18px; }
 .compteur.en-ligne b { color: var(--vert); }
-.compteur.voles b { color: var(--rouge); }
+.compteur.alertes b { color: var(--rouge); }
 
 /* Zone principale */
 .ecran { display: flex; height: calc(100% - 61px); }
@@ -60,6 +60,11 @@
 .appareil-info { font-size: 13px; color: var(--gris); }
 .appareil-maj { font-size: 12px; color: var(--gris); }
 .appareil.vole .appareil-maj { color: var(--rouge); font-weight: 700; }
+.badge-alerte {
+  display: inline-block; margin-top: 4px; padding: 2px 8px;
+  background: #fdecea; color: var(--rouge); border-radius: 20px;
+  font-size: 12px; font-weight: 700;
+}
 
 /* Carte */
 .panneau-carte { flex: 1; position: relative; }
@@ -86,7 +91,26 @@
 .detail-ligne { display: flex; border-bottom: 1px solid var(--bordure); padding: 10px 0; }
 .detail-cle { width: 42%; color: var(--gris); font-size: 14px; }
 .detail-valeur { flex: 1; font-size: 15px; }
-#bouton-vol { margin-top: 18px; }
+#bouton-itineraire { margin-top: 18px; }
+#bouton-vol { margin-top: 10px; }
+
+/* Alertes en haut de la fiche */
+.alertes-fiche { list-style: none; margin: 0 0 14px; padding: 0; }
+.alertes-fiche li {
+  background: #fdecea; color: var(--rouge); font-weight: 700;
+  border-radius: 8px; padding: 8px 12px; margin-bottom: 6px;
+}
+
+/* Contrôles de la clôture géographique */
+.actions-zone { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; margin: 8px 0 4px; }
+.champ-en-ligne { font-size: 13px; color: var(--gris); }
+.champ-en-ligne input { width: 90px; margin-top: 4px; padding: 8px 10px; font-size: 15px;
+  border: 1px solid var(--bordure); border-radius: 8px; display: block; }
+.actions-zone .bouton { padding: 8px 12px; font-size: 14px; }
+
+/* Trajet récent */
+.historique { margin: 6px 0 0; padding-left: 20px; font-size: 13px; color: var(--texte); }
+.historique li { padding: 3px 0; }
 
 /* À propos */
 .about { margin: 8px 0; }

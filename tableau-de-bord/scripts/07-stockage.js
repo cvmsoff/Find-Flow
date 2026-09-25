@@ -15,6 +15,7 @@
                                chaque changement ; renvoie une fonction pour se
                                désabonner.
      definirMode(id, mode)  -> Promise ; met un appareil en « normal » ou « vole ».
+     definirZone(id, zone)  -> Promise ; pose une clôture (ou null pour la retirer).
      dernierEtat()          -> la dernière liste connue (utile hors ligne). */
 
 var FindFlow = window.FindFlow || (window.FindFlow = {});
@@ -45,17 +46,19 @@ FindFlow.stockage = (function creerStockage() {
         if (a.mode === 'vole') {
           /* Un appareil volé « rapporte » plus vite et se rafraîchit toujours :
              c'est le comportement qu'on veut le jour du vol. */
+          const p = bougerUnPeu(a.position, 0.0006);
           return Object.assign({}, a, {
-            derniereMaj: maintenant,
-            position: bougerUnPeu(a.position, 0.0006)
+            derniereMaj: maintenant, position: p,
+            historique: ajouterAuTrajet(a, p, maintenant)
           });
         }
         /* Les autres ne bougent que s'ils étaient déjà récents, pour garder
            un appareil volontairement « hors ligne » dans cet état. */
         if (FindFlow.format.estEnLigne(a)) {
+          const p = bougerUnPeu(a.position, 0.0002);
           return Object.assign({}, a, {
-            derniereMaj: maintenant,
-            position: bougerUnPeu(a.position, 0.0002)
+            derniereMaj: maintenant, position: p,
+            historique: ajouterAuTrajet(a, p, maintenant)
           });
         }
         return a;
@@ -71,6 +74,16 @@ FindFlow.stockage = (function creerStockage() {
     });
   }
 
+  /* On ajoute la nouvelle position au trajet et on coupe le début : on garde le
+     trajet récent, pas tout l'historique de l'appareil (choix assumé, voir la
+     config). Sans cette coupe, la mémoire et la trace sur la carte grossiraient
+     sans fin. */
+  function ajouterAuTrajet(a, position, at) {
+    const trajet = (a.historique || []).concat([{ lat: position.lat, lng: position.lng, at: at }]);
+    const max = FindFlow.config.longueurHistorique;
+    return trajet.length > max ? trajet.slice(trajet.length - max) : trajet;
+  }
+
   return {
     ecouter(rappel) {
       abonnes.add(rappel);
@@ -84,6 +97,16 @@ FindFlow.stockage = (function creerStockage() {
     definirMode(id, mode) {
       appareils = appareils.map(function (a) {
         return a.id === id ? Object.assign({}, a, { mode: mode }) : a;
+      });
+      notifier();
+      return Promise.resolve(true);
+    },
+
+    /* Pose ou retire la clôture géographique d'un appareil. Passer null retire
+       la zone (l'appareil ne peut alors plus être « hors zone »). */
+    definirZone(id, zone) {
+      appareils = appareils.map(function (a) {
+        return a.id === id ? Object.assign({}, a, { zone: zone || null }) : a;
       });
       notifier();
       return Promise.resolve(true);

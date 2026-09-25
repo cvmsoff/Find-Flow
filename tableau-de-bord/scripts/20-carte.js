@@ -84,5 +84,38 @@ FindFlow.carte = (function creerCarte() {
     }
   }
 
-  return { initialiser, afficher, centrerSur };
+  /* Couche « sélection » : la trace du trajet et la clôture de l'appareil
+     ouvert. On la garde à part des points pour pouvoir l'effacer d'un coup
+     quand on ferme la fiche, sans redessiner tous les appareils. */
+  let coucheSelection = null;
+
+  function effacerSelection() {
+    if (carte && coucheSelection) { carte.removeLayer(coucheSelection); coucheSelection = null; }
+  }
+
+  function montrerSelection(appareil) {
+    if (!carte || !appareil) return;
+    effacerSelection();
+    coucheSelection = L.layerGroup().addTo(carte);
+
+    /* La trace : le trajet récent, en pointillés, pour voir d'où vient l'appareil. */
+    if (appareil.historique && appareil.historique.length > 1) {
+      const points = appareil.historique.map(function (p) { return [p.lat, p.lng]; });
+      L.polyline(points, { color: '#155c43', weight: 3, opacity: 0.7, dashArray: '6 6' })
+        .addTo(coucheSelection);
+    }
+
+    /* La clôture géographique, s'il y en a une : le cercle où l'appareil doit
+       rester. En rouge s'il en est sorti, pour que l'œil aille droit dessus. */
+    if (appareil.zone) {
+      const dedans = FindFlow.geo.estDansZone(appareil.position, appareil.zone);
+      L.circle([appareil.zone.lat, appareil.zone.lng], {
+        radius: appareil.zone.rayon_m,
+        color: dedans ? '#1f7a5a' : '#c0392b', weight: 2,
+        fillColor: dedans ? '#1f7a5a' : '#c0392b', fillOpacity: 0.06
+      }).addTo(coucheSelection);
+    }
+  }
+
+  return { initialiser, afficher, centrerSur, montrerSelection, effacerSelection };
 })();

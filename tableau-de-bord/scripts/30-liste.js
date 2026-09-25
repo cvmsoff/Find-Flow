@@ -53,6 +53,15 @@ FindFlow.liste = (function creerListe() {
       const classeEtat = a.mode === 'vole' ? 'vole' : (enLigne ? 'en-ligne' : 'hors-ligne');
       const etiquetteEtat = a.mode === 'vole' ? 'VOLÉ'
         : (enLigne ? 'En ligne' : 'Hors ligne');
+
+      /* Une seule pastille d'alerte, la plus grave : dans une liste on veut le
+         signal fort d'un coup d'œil, pas cinq étiquettes empilées. */
+      const alertes = FindFlow.alertes.pour(a);
+      const badge = alertes.length
+        ? '<span class="badge-alerte">' + FindFlow.format.echapper(alertes[0].texte) +
+            (alertes.length > 1 ? ' +' + (alertes.length - 1) : '') + '</span>'
+        : '';
+
       return '' +
         '<button class="appareil ' + classeEtat + '" data-id="' + FindFlow.format.echapper(a.id) + '">' +
           '<span class="pastille"></span>' +
@@ -64,6 +73,7 @@ FindFlow.liste = (function creerListe() {
             '</span>' +
             '<span class="appareil-maj">' + etiquetteEtat + ' · ' +
               FindFlow.format.depuis(a.derniereMaj) + '</span>' +
+            badge +
           '</span>' +
         '</button>';
     }).join('');
@@ -77,10 +87,10 @@ FindFlow.liste = (function creerListe() {
 
   function majCompteurs() {
     const enLigne = tousLesAppareils.filter(FindFlow.format.estEnLigne).length;
-    const voles = tousLesAppareils.filter(function (a) { return a.mode === 'vole'; }).length;
+    const alertes = FindFlow.alertes.compterAppareils(tousLesAppareils);
     poser('compteur-total', tousLesAppareils.length);
     poser('compteur-en-ligne', enLigne);
-    poser('compteur-voles', voles);
+    poser('compteur-alertes', alertes);
   }
 
   function poser(id, valeur) {

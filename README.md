@@ -20,8 +20,12 @@ et un bandeau le signale — la position d'un appareil, elle, ne dépend pas d'i
 ### Ce qui marche déjà
 
 - Carte des appareils, avec un cercle de précision (un PC localisé par Wi-Fi est « quelque part »).
-- Liste avec **recherche** et **compteurs** (total / en ligne / volés).
-- Fiche d'un appareil : propriétaire, état, dernière position, batterie, coordonnées.
+- Liste avec **recherche** et **compteurs** (total / en ligne / **alertes**).
+- **Alertes** par appareil : sorti de sa zone, batterie faible, SIM changée, hors ligne, volé.
+- Fiche d'un appareil : alertes, état, dernière position, batterie, SIM, coordonnées.
+- **Clôture géographique** : poser une zone autour d'un appareil et être alerté s'il en sort.
+- **Trajet récent** (historique des positions) + trace sur la carte.
+- Bouton **« Itinéraire »** : ouvre le chemin vers l'appareil dans l'appli de cartes.
 - Bouton **« Signaler volé »** (avec confirmation) : l'appareil rapporte alors plus souvent.
 - Écran **« Infos & réglages »** signé Cams-Lab, avec les réglages d'entreprise
   (nom, adresse, téléphones, e-mail, RCCM, compte contribuable) — jamais écrits en dur.
@@ -62,6 +66,20 @@ npm test             Lance les bancs d'essai (affiche OK / ÉCHEC en français)
 1. **Le serveur** : choisir le projet Firebase, y brancher `07-stockage.js` à la place
    des données de démonstration. C'est le seul fichier à réécrire.
 2. **Les agents** : le petit programme qui envoie la position, sur téléphone Android
-   puis sur PC Windows.
+   puis sur PC Windows. Ces fonctions **exigent l'agent** (impossibles depuis le
+   seul tableau de bord) :
+   - Mode volé côté appareil : sonnerie forte, verrouillage à distance, message à l'écran.
+   - Alerte SIM changée **réelle** (le tableau de bord sait déjà l'afficher).
+   - Photo à la webcam après plusieurs mauvais mots de passe — **sur ton ordi perso
+     uniquement**, jamais sur l'appareil d'une autre personne.
+   - Protection contre la désinstallation (visible, pas cachée).
+   - Inventaire des applications installées (appareils pro).
 3. **Comptes et rôles** (administrateur / responsable / employé) + journal d'activité.
 4. **La version téléphone** du tableau de bord.
+
+### Mises en attente (décision Cams-Lab)
+
+Fonctions de surveillance d'une personne, **volontairement non développées** pour
+l'instant (risque juridique + éthique sur l'appareil d'une employée) : écoute par le
+micro, caméra en direct, lecture des messageries. À ne réactiver, le cas échéant,
+qu'avec le consentement clair de la personne et une base légale.
