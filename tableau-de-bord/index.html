@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Find-Flow — Localisation des appareils</title>
+  <meta name="author" content="Cams-Lab (Seya Gilles Cames)">
+  <meta name="description" content="Find-Flow, localisation des appareils de l'entreprise — développé par Cams-Lab">
+  <meta name="copyright" content="© 2026 Cams-Lab">
+
+  <!-- Leaflet recopié en local dans vendor/ : jamais depuis un CDN. -->
+  <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+  <link rel="stylesheet" href="styles/01-base.css">
+  <link rel="stylesheet" href="styles/02-mise-en-page.css">
+</head>
+<body>
+
+  <!-- Écran de démarrage : logo Cams-Lab discret, en bas. -->
+  <div id="splash">
+    <div class="splash-titre">Find-Flow</div>
+    <div class="splash-sous">Localisation des appareils</div>
+    <img class="splash-logo" src="logo/logo-cams-lab.svg" alt="Cams-Lab">
+  </div>
+
+  <header class="entete">
+    <div class="entete-gauche">
+      <strong>Find-Flow</strong>
+      <span class="entete-client" id="nom-client-entete">&lt;Client&gt;</span>
+    </div>
+    <div class="compteurs">
+      <span class="compteur"><b id="compteur-total">0</b> appareils</span>
+      <span class="compteur en-ligne"><b id="compteur-en-ligne">0</b> en ligne</span>
+      <span class="compteur voles"><b id="compteur-voles">0</b> volés</span>
+    </div>
+    <button class="bouton bouton-neutre" id="ouvrir-infos">Infos & réglages</button>
+  </header>
+
+  <main class="ecran">
+    <section class="panneau-liste">
+      <input id="recherche" class="recherche" type="search"
+             placeholder="Rechercher un appareil ou un propriétaire…"
+             aria-label="Rechercher un appareil">
+      <div id="liste-appareils" class="liste"></div>
+    </section>
+
+    <section class="panneau-carte">
+      <div id="carte-hors-ligne" class="bandeau-hors-ligne" hidden>
+        Fond de carte indisponible (pas de réseau). Les positions restent affichées.
+      </div>
+      <div id="carte"></div>
+    </section>
+  </main>
+
+  <!-- Panneau de détails d'un appareil -->
+  <aside id="details" class="volet" hidden>
+    <div class="volet-entete">
+      <h2 id="details-titre">Appareil</h2>
+      <button class="bouton-fermer" id="details-fermer" aria-label="Fermer">×</button>
+    </div>
+    <div id="details-corps"></div>
+    <button id="bouton-vol" class="bouton bouton-alerte">Signaler cet appareil volé</button>
+  </aside>
+
+  <!-- Écran « À propos & réglages » -->
+  <aside id="infos" class="volet" hidden>
+    <div class="volet-entete">
+      <h2>Informations & réglages</h2>
+      <button class="bouton-fermer" id="infos-fermer" aria-label="Fermer">×</button>
+    </div>
+
+    <h3>Réglages de l'entreprise</h3>
+    <p class="aide">Ces informations changent d'un client à l'autre. Elles sont enregistrées sur ce poste.</p>
+    <label class="champ">Nom de l'entreprise<input id="reg-nom" type="text"></label>
+    <label class="champ">Adresse<input id="reg-adresse" type="text"></label>
+    <label class="champ">Téléphones<input id="reg-telephones" type="text" placeholder="+225 …"></label>
+    <label class="champ">E-mail<input id="reg-email" type="email"></label>
+    <label class="champ">RCCM<input id="reg-rccm" type="text"></label>
+    <label class="champ">Compte contribuable<input id="reg-contribuable" type="text"></label>
+    <button id="reglages-enregistrer" class="bouton bouton-principal">Enregistrer les réglages</button>
+    <p id="reglages-message" class="aide"></p>
+
+    <h3>À propos</h3>
+    <div class="about">
+      <div class="about-row"><div class="k">Application</div><div class="v">Find-Flow <span id="version-app">0.0.0</span></div></div>
+      <div class="about-row"><div class="k">Développé par</div><div class="v">Cams-Lab (Seya Gilles Cames)</div></div>
+      <div class="about-row"><div class="k">Contact</div><div class="v"><a href="mailto:cams-lab@proton.me">cams-lab@proton.me</a></div></div>
+      <div class="about-row"><div class="k">Licence</div><div class="v">Usage exclusif <span id="nom-client-licence">&lt;Client&gt;</span> — © <span id="annee-licence">2026</span> Cams-Lab</div></div>
+    </div>
+    <img class="about-logo" src="logo/logo-cams-lab.svg" alt="Cams-Lab">
+  </aside>
+
+  <!-- Scripts chargés dans l'ordre. Un fichier = un sujet. -->
+  <script src="vendor/leaflet/leaflet.js"></script>
+  <script src="scripts/01-config.js"></script>
+  <script src="scripts/05-format.js"></script>
+  <script src="scripts/06-donnees-demo.js"></script>
+  <script src="scripts/07-stockage.js"></script>
+  <script src="scripts/20-carte.js"></script>
+  <script src="scripts/30-liste.js"></script>
+  <script src="scripts/40-details.js"></script>
+  <script src="scripts/90-a-propos.js"></script>
+  <script src="scripts/99-app.js"></script>
+</body>
+</html>

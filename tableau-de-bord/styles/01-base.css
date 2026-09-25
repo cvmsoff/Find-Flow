@@ -1,0 +1,52 @@
+/* Base : couleurs, texte, boutons. Volontairement sobre et lisible sur un
+   téléphone d'entrée de gamme comme sur un écran de bureau. Gros boutons,
+   fort contraste : nos utilisateurs travaillent debout et pressés. */
+
+:root {
+  --vert: #1f7a5a;
+  --vert-fonce: #155c43;
+  --rouge: #c0392b;
+  --gris: #7a8b99;
+  --texte: #12222b;
+  --fond: #f4f6f8;
+  --carte-fond: #fff;
+  --bordure: #dfe6ec;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  color: var(--texte);
+  background: var(--fond);
+}
+
+a { color: var(--vert-fonce); }
+
+.bouton {
+  border: 0;
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.bouton-principal { background: var(--vert); color: #fff; width: 100%; }
+.bouton-principal:hover { background: var(--vert-fonce); }
+.bouton-alerte { background: var(--rouge); color: #fff; width: 100%; }
+.bouton-neutre { background: #e7edf1; color: var(--texte); }
+
+.aide { color: var(--gris); font-size: 13px; margin: 6px 0 14px; }
+
+.champ { display: block; margin-bottom: 12px; font-size: 13px; color: var(--gris); }
+.champ input {
+  display: block;
+  width: 100%;
+  margin-top: 4px;
+  padding: 10px 12px;
+  font-size: 16px;
+  border: 1px solid var(--bordure);
+  border-radius: 8px;
+}

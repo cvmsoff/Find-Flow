@@ -1,0 +1,19 @@
+{
+  "name": "find-flow",
+  "version": "0.1.0",
+  "description": "Find-Flow — localisation en temps réel des appareils de l'entreprise, développé par Cams-Lab pour <Client>",
+  "author": "Cams-Lab (Seya Gilles Cames) <cams-lab@proton.me>",
+  "copyright": "© 2026 Cams-Lab",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "sync-vendor": "node outils/sync-vendor.js",
+    "test": "node tests/lancer-les-tests.js"
+  },
+  "dependencies": {
+    "leaflet": "1.9.4"
+  },
+  "//dependencies": {
+    "leaflet": "La carte du tableau de bord. Installée par npm puis RECOPIÉE dans tableau-de-bord/vendor/ par `npm run sync-vendor` — le code livré ne lit jamais node_modules, et rien n'est chargé depuis un CDN."
+  }
+}
