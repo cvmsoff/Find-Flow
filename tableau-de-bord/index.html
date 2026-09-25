@@ -126,6 +126,11 @@
     </label>
     <p class="aide">Crée un compte gratuit sur maptiler.com, copie ta clé et colle-la ici
       pour afficher la carte OpenStreetMap. Sans clé, une carte de secours s'affiche.</p>
+    <label class="champ">Configuration Firebase (le bloc du projet)
+      <textarea id="reg-firebase" rows="7" placeholder="Colle ici le bloc firebaseConfig { apiKey: ..., projectId: ..., ... }"></textarea>
+    </label>
+    <p class="aide">Colle le bloc <code>firebaseConfig</code> de ton projet. Tant qu'il est vide,
+      l'app tourne sur les données de démonstration. Une fois collé, elle se branche sur ton serveur.</p>
     <button id="reglages-enregistrer" class="pilule pilule-principale pilule-large">Enregistrer les réglages</button>
     <p id="reglages-message" class="aide"></p>
 
@@ -168,6 +173,8 @@
   <script src="scripts/05-format.js"></script>
   <script src="scripts/06-donnees-demo.js"></script>
   <script src="scripts/07-stockage.js"></script>
+  <script src="scripts/08-stockage-firebase.js"></script>
+  <script src="scripts/09-choix-stockage.js"></script>
   <script src="scripts/20-carte.js"></script>
   <script src="scripts/30-liste.js"></script>
   <script src="scripts/50-alertes.js"></script>

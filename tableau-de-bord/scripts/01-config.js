@@ -26,7 +26,10 @@ FindFlow.config = {
     /* Clé du fournisseur de carte (MapTiler), saisie par l'utilisateur dans les
        réglages. Elle reste sur le poste — jamais écrite en dur ici, jamais
        poussée dans le dépôt. Vide = on retombe sur un fond de carte de secours. */
-    cleCarte: ''
+    cleCarte: '',
+    /* Configuration Firebase (le bloc du projet), collée par l'utilisateur.
+       Reste sur le poste, change d'un client à l'autre. Vide = données de démo. */
+    configFirebase: ''
   },
 
   /* Où se centre la carte au démarrage quand aucun appareil n'a encore de

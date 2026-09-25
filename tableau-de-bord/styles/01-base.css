@@ -107,5 +107,10 @@ h1, h2, h3 { margin: 0; font-weight: 700; letter-spacing: 0; }
   display: block; width: 100%; margin-top: 5px; padding: 11px 13px; font-size: 15px;
   color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
 }
-.champ input:focus, .barre-recherche input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.champ textarea {
+  display: block; width: 100%; margin-top: 5px; padding: 11px 13px; font-size: 13px;
+  color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+  font-family: "Menlo", "Consolas", monospace; resize: vertical;
+}
+.champ input:focus, .champ textarea:focus, .barre-recherche input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
 .aide { color: var(--muted); font-size: 13px; margin: 6px 0 14px; line-height: 1.45; }

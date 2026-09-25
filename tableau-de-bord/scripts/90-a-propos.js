@@ -48,6 +48,7 @@ FindFlow.aPropos = (function creerAPropos() {
     valeur('reg-rccm', r.rccm);
     valeur('reg-contribuable', r.compteContribuable);
     valeur('reg-cle-carte', r.cleCarte);
+    valeur('reg-firebase', r.configFirebase);
   }
 
   function enregistrerReglages() {
@@ -58,8 +59,10 @@ FindFlow.aPropos = (function creerAPropos() {
       email: lire('reg-email'),
       rccm: lire('reg-rccm'),
       compteContribuable: lire('reg-contribuable'),
-      cleCarte: lire('reg-cle-carte')
+      cleCarte: lire('reg-cle-carte'),
+      configFirebase: lire('reg-firebase')
     };
+    const avant = FindFlow.reglages.lire().configFirebase || '';
     const ok = FindFlow.reglages.enregistrer(reglages);
     const info = document.getElementById('reglages-message');
     if (info) {
@@ -72,6 +75,13 @@ FindFlow.aPropos = (function creerAPropos() {
     /* La clé carte a pu changer : on repose le fond de carte tout de suite,
        sans obliger l'utilisateur à recharger la page. */
     if (FindFlow.carte && FindFlow.carte.rafraichirFond) FindFlow.carte.rafraichirFond();
+
+    /* Brancher/débrancher Firebase se fait au chargement de la page. Si la
+       configuration Firebase a changé, on recharge pour l'appliquer proprement. */
+    if ((reglages.configFirebase || '') !== avant) {
+      if (info) info.textContent = 'Réglages enregistrés. Rechargement pour appliquer le serveur…';
+      setTimeout(function () { window.location.reload(); }, 900);
+    }
   }
 
   /* Le nom du client s'affiche dans l'en-tête et dans la ligne de licence

@@ -20,7 +20,7 @@
 
 var FindFlow = window.FindFlow || (window.FindFlow = {});
 
-FindFlow.stockage = (function creerStockage() {
+FindFlow.stockageDemo = (function creerStockage() {
   let appareils = FindFlow.donneesDemo();
   const abonnes = new Set();
 
@@ -146,3 +146,8 @@ FindFlow.stockage = (function creerStockage() {
     }
   };
 })();
+
+/* Par défaut, l'app parle au module de démonstration. Le sélecteur
+   09-choix-stockage.js le remplacera par Firebase si une configuration est
+   présente dans les réglages. */
+FindFlow.stockage = FindFlow.stockageDemo;

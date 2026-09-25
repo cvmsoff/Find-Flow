@@ -11,9 +11,11 @@
     "test": "node tests/lancer-les-tests.js"
   },
   "dependencies": {
+    "firebase": "^12.19.0",
     "leaflet": "1.9.4"
   },
   "//dependencies": {
-    "leaflet": "La carte du tableau de bord. Installée par npm puis RECOPIÉE dans tableau-de-bord/vendor/ par `npm run sync-vendor` — le code livré ne lit jamais node_modules, et rien n'est chargé depuis un CDN."
+    "leaflet": "La carte du tableau de bord. Installée par npm puis RECOPIÉE dans tableau-de-bord/vendor/ par `npm run sync-vendor` — le code livré ne lit jamais node_modules, et rien n'est chargé depuis un CDN.",
+    "firebase": "Le serveur (base temps réel + hors ligne + authentification). On recopie ses versions « compat » (UMD) dans vendor/firebase/ via `npm run sync-vendor` ; elles s'utilisent avec de simples <script>, sans étape de compilation."
   }
 }

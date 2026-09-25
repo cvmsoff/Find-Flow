@@ -49,6 +49,24 @@ function principal() {
   for (const nom of imagesACopier) {
     copier(path.join(sourceLeaflet, 'images', nom), path.join(cibleLeaflet, 'images', nom));
   }
+
+  /* Firebase : on recopie les versions « compat » (UMD), qui s'utilisent avec de
+     simples balises <script>, SANS étape de compilation. On ne prend que ce dont
+     le tableau de bord a besoin : l'app, la base (Firestore) et l'authentification. */
+  const sourceFirebase = path.join(racine, 'node_modules', 'firebase');
+  const cibleFirebase = path.join(racine, 'tableau-de-bord', 'vendor', 'firebase');
+  const fichiersFirebase = [
+    'firebase-app-compat.js',
+    'firebase-firestore-compat.js',
+    'firebase-auth-compat.js'
+  ];
+  if (fs.existsSync(sourceFirebase)) {
+    console.log('Recopie de Firebase vers vendor/ :');
+    for (const nom of fichiersFirebase) {
+      copier(path.join(sourceFirebase, nom), path.join(cibleFirebase, nom));
+    }
+  }
+
   console.log('Terminé.');
 }
 
