@@ -25,6 +25,7 @@ FindFlow.details = (function creerDetails() {
 
   function ouvrir(id) {
     idAffiche = id;
+    effacerRoute(); // on repart sans l'itinéraire de l'appareil précédent
     dessiner();
     const panneau = document.getElementById('details');
     if (panneau) panneau.hidden = false;
@@ -33,8 +34,16 @@ FindFlow.details = (function creerDetails() {
   function masquer() {
     idAffiche = null;
     if (FindFlow.carte) FindFlow.carte.effacerSelection();
+    effacerRoute();
     const panneau = document.getElementById('details');
     if (panneau) panneau.hidden = true;
+  }
+
+  /* Efface la route tracée et l'info associée. */
+  function effacerRoute() {
+    if (FindFlow.carte && FindFlow.carte.effacerItineraire) FindFlow.carte.effacerItineraire();
+    const info = document.getElementById('route-info');
+    if (info) { info.hidden = true; info.textContent = ''; }
   }
 
   function trouver() {
@@ -207,14 +216,39 @@ FindFlow.details = (function creerDetails() {
     FindFlow.stockage.definirMode(a.id, versVole ? 'vole' : 'normal');
   }
 
-  /* Ouvre l'itinéraire vers l'appareil dans l'application de cartes du poste.
-     Nécessite internet ; c'est une aide ponctuelle (aller récupérer l'appareil),
-     pas une fonction de suivi. */
+  /* Trace la route depuis MA position jusqu'à l'appareil, directement sur la
+     carte, et fixe la vue dessus. On a besoin de la position du poste : on la
+     demande au navigateur. Si elle est refusée, on propose au moins d'ouvrir la
+     navigation dans l'appli de cartes. */
   function ouvrirItineraire(a) {
     if (!a.position) return;
-    const url = 'https://www.google.com/maps/dir/?api=1&destination=' +
-      a.position.lat + ',' + a.position.lng;
-    window.open(url, '_blank', 'noopener');
+    const info = document.getElementById('route-info');
+    if (info) { info.hidden = false; info.textContent = 'Localisation en cours…'; }
+
+    if (!navigator.geolocation) {
+      if (info) info.innerHTML = 'Localisation indisponible sur ce poste. ' + lienMaps(a);
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(function (pos) {
+      const origine = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      FindFlow.carte.tracerItineraire(origine, a.position, function (r) {
+        if (!info) return;
+        const km = (r.distance / 1000).toFixed(1).replace('.', ',');
+        info.innerHTML = (r.routier
+          ? 'Route : ' + km + ' km' + (r.duree ? ' · ~' + Math.round(r.duree / 60) + ' min' : '')
+          : 'À vol d’oiseau : ' + km + ' km (trajet routier indisponible)') +
+          ' — ' + lienMaps(a);
+      });
+    }, function () {
+      if (info) info.innerHTML = 'Active la localisation pour tracer la route. ' + lienMaps(a);
+    }, { enableHighAccuracy: true, timeout: 10000 });
+  }
+
+  /* Lien de secours vers l'appli de cartes du poste, pour la navigation
+     routière pas-à-pas (utile le jour où on va vraiment récupérer l'appareil). */
+  function lienMaps(a) {
+    return '<a href="https://www.google.com/maps/dir/?api=1&destination=' +
+      a.position.lat + ',' + a.position.lng + '" target="_blank" rel="noopener">Ouvrir dans Maps</a>';
   }
 
   function poserZone(a) {

@@ -35,6 +35,14 @@ FindFlow.carte = (function creerCarte() {
        ne jamais laisser l'utilisateur devant une carte vide.
      On peut la rappeler après que l'utilisateur a collé sa clé, sans recharger
      la page : on retire l'ancien fond et on met le nouveau. */
+  /* Réglages communs aux tuiles pour un zoom fluide, SANS flash noir :
+     - keepBuffer garde plus de tuiles autour de l'écran, prêtes à l'affichage ;
+     - updateWhenZooming évite de recharger pendant le geste de zoom (on met à
+       jour une fois le zoom fini), ce qui supprime le clignotement. */
+  function optionsTuiles() {
+    return { maxZoom: 19, keepBuffer: 6, updateWhenZooming: false };
+  }
+
   let coucheFond = null;
   function installerFond() {
     if (!carte) return;
@@ -46,18 +54,14 @@ FindFlow.carte = (function creerCarte() {
          La clé voyage dans l'adresse de la tuile ; elle vient des réglages, pas
          du code. */
       coucheFond = L.tileLayer(
-        'https://api.maptiler.com/maps/openstreetmap/{z}/{x}/{y}.jpg?key=' + encodeURIComponent(cle), {
-          maxZoom: 19,
-          attribution: '© OpenStreetMap contributors, © MapTiler'
-        });
+        'https://api.maptiler.com/maps/openstreetmap/{z}/{x}/{y}.jpg?key=' + encodeURIComponent(cle),
+        Object.assign({ attribution: '© OpenStreetMap contributors, © MapTiler' }, optionsTuiles()));
     } else {
       /* Fond de secours Esri (sans clé). ATTENTION : Esri attend {z}/{y}/{x}
          (le y AVANT le x) ; inversés, les tuiles seraient au mauvais endroit. */
       coucheFond = L.tileLayer(
-        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
-          maxZoom: 19,
-          attribution: 'Fond de carte © Esri (secours — ajoute ta clé pour OpenStreetMap)'
-        });
+        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
+        Object.assign({ attribution: 'Fond de carte © Esri (secours — ajoute ta clé pour OpenStreetMap)' }, optionsTuiles()));
     }
     /* Nouveau fond = nouvel essai : on cache le bandeau « hors ligne » ; il
        reviendra tout seul si les tuiles échouent encore. */
@@ -176,8 +180,55 @@ FindFlow.carte = (function creerCarte() {
     carte.fitBounds(points, { padding: [40, 40] });
   }
 
+  /* Trace la route entre MA position et l'appareil, et fixe la carte dessus.
+     On demande d'abord le vrai chemin routier (service OSRM) ; s'il ne répond
+     pas, on retombe sur une ligne directe « à vol d'oiseau » avec la distance.
+     Dans les deux cas l'utilisateur voit où aller. `quandPret` reçoit les infos
+     (distance en m, durée en s ou null, et si c'est un vrai trajet routier). */
+  let coucheItineraire = null;
+
+  function effacerItineraire() {
+    if (carte && coucheItineraire) { carte.removeLayer(coucheItineraire); coucheItineraire = null; }
+  }
+
+  function tracerItineraire(origine, dest, quandPret) {
+    if (!carte || !origine || !dest) return;
+    effacerItineraire();
+
+    const dessiner = function (pointsLatLng, infos) {
+      coucheItineraire = L.layerGroup().addTo(carte);
+      L.polyline(pointsLatLng, { color: '#7c5cff', weight: 6, opacity: 0.85 }).addTo(coucheItineraire);
+      L.circleMarker([origine.lat, origine.lng], {
+        radius: 7, color: '#fff', weight: 2, fillColor: '#7c5cff', fillOpacity: 1
+      }).bindTooltip('Moi', { direction: 'top' }).addTo(coucheItineraire);
+      carte.fitBounds(pointsLatLng, { padding: [60, 60] });
+      if (quandPret) quandPret(infos);
+    };
+
+    const versLigneDroite = function () {
+      dessiner([[origine.lat, origine.lng], [dest.lat, dest.lng]],
+        { distance: FindFlow.geo.distanceMetres(origine, dest), duree: null, routier: false });
+    };
+
+    /* Chemin routier réel, si le service répond. */
+    const url = 'https://router.project-osrm.org/route/v1/driving/' +
+      origine.lng + ',' + origine.lat + ';' + dest.lng + ',' + dest.lat +
+      '?overview=full&geometries=geojson';
+    fetch(url)
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        if (j && j.routes && j.routes[0] && j.routes[0].geometry) {
+          const pts = j.routes[0].geometry.coordinates.map(function (c) { return [c[1], c[0]]; });
+          dessiner(pts, { distance: j.routes[0].distance, duree: j.routes[0].duration, routier: true });
+        } else {
+          versLigneDroite();
+        }
+      })
+      .catch(versLigneDroite);
+  }
+
   return {
     initialiser, afficher, centrerSur, montrerSelection, effacerSelection,
-    ajusterSurTous, rafraichirFond: installerFond
+    ajusterSurTous, tracerItineraire, effacerItineraire, rafraichirFond: installerFond
   };
 })();

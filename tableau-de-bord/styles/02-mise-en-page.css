@@ -2,19 +2,43 @@
    éléments (barre, liste, fiche) flottent par-dessus dans des cartes arrondies.
    S'adapte au téléphone : la liste passe en tiroir plein largeur en bas. */
 
-/* ---- Écran de démarrage ---- */
+/* ---- Écran de démarrage animé ---- */
 #splash {
   position: fixed; inset: 0; z-index: 2000;
-  background: var(--brand); color: #fff;
+  background: var(--surface); color: var(--text);
   display: flex; flex-direction: column; align-items: center; justify-content: center;
+  transition: opacity .4s ease;
 }
 #splash[hidden] { display: none; }
-.splash-marque { font-size: 42px; font-weight: 900; letter-spacing: -0.02em; }
-.splash-sous { font-size: 15px; opacity: .85; margin-top: 6px; }
-.splash-logo { position: absolute; bottom: 28px; height: 30px; filter: brightness(0) invert(1); opacity: .85; }
+#splash.ferme { opacity: 0; }
+
+/* Le logo de l'app : la pastille verte + le nom, qui montent en douceur. */
+.splash-app { display: flex; align-items: center; gap: 12px; opacity: 0;
+  animation: apparaitre .6s ease .15s forwards; }
+.splash-pastille { width: 40px; height: 40px; border-radius: 12px;
+  background: linear-gradient(135deg, var(--brand), #34d17f); }
+.splash-nom { font-size: 40px; font-weight: 800; }
+.splash-sous { font-size: 15px; color: var(--muted); margin-top: 8px; opacity: 0;
+  animation: apparaitre .6s ease .4s forwards; }
+
+/* Le logo du label, en bas, arrive après. */
+.splash-par { position: absolute; bottom: 40px; display: flex; flex-direction: column;
+  align-items: center; gap: 8px; opacity: 0; animation: apparaitre .7s ease .9s forwards; }
+.splash-par span { font-size: 12px; color: var(--muted); letter-spacing: .05em; text-transform: uppercase; }
+.splash-par img { height: 26px; }
+:root[data-theme="dark"] .splash-par img { filter: brightness(0) invert(1); opacity: .9; }
+
+@keyframes apparaitre { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 
 /* ---- La carte, en fond plein écran ---- */
-#carte { position: fixed; inset: 0; z-index: 0; background: var(--surface-2); }
+/* Fond clair FIXE (pas lié au thème) : pendant un zoom, Leaflet montre ce fond
+   le temps que les tuiles arrivent. S'il était sombre, on voyait un flash noir. */
+#carte { position: fixed; inset: 0; z-index: 0; background: #e8eaed; }
+
+/* On masque les barres de défilement des cartes flottantes : elles restent
+   défilables (molette, glissement) mais sans la barre visible qui alourdit. */
+.liste, .fiche, .volet { scrollbar-width: none; }
+.liste::-webkit-scrollbar, .fiche::-webkit-scrollbar, .volet::-webkit-scrollbar { width: 0; height: 0; display: none; }
 .bandeau-hors-ligne {
   position: fixed; top: 78px; left: 50%; transform: translateX(-50%); z-index: 30;
   background: #fff7ed; color: var(--warn); border: 1px solid #f2c88a;
@@ -83,7 +107,7 @@
 .appareil.vole { --anneau: var(--danger); }
 
 .appareil-texte { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
-.appareil-nom { font-weight: 800; font-size: 15px; }
+.appareil-nom { font-weight: 700; font-size: 15px; }
 .appareil-sous { font-size: 12.5px; color: var(--muted); }
 .badge-alerte { align-self: flex-start; margin-top: 3px; padding: 2px 9px;
   background: var(--danger-doux); color: var(--danger); border-radius: 999px; font-size: 12px; font-weight: 800; }
@@ -114,6 +138,9 @@
 .fiche-fermer { border: 0; background: transparent; font-size: 26px; line-height: 1; cursor: pointer; color: var(--muted); }
 .fiche-actions { display: flex; gap: 8px; margin-top: 14px; }
 .fiche-actions .pilule { flex: 1; }
+.route-info { margin-top: 10px; font-size: 13px; color: var(--muted); line-height: 1.4; }
+.route-info[hidden] { display: none; }
+.route-info a { font-weight: 700; }
 
 .detail-ligne { display: flex; border-bottom: 1px solid var(--border); padding: 9px 0; }
 .detail-cle { width: 42%; color: var(--muted); font-size: 13.5px; }

@@ -9,9 +9,13 @@ var FindFlow = window.FindFlow || (window.FindFlow = {});
 
 (function demarrer() {
   document.addEventListener('DOMContentLoaded', function () {
-    /* L'écran de démarrage disparaît une fois la page prête. */
+    /* L'écran de démarrage joue son animation (logo app puis logo label) puis
+       s'efface en fondu. Deux temps : on lance le fondu, puis on le retire. */
     const splash = document.getElementById('splash');
-    if (splash) setTimeout(function () { splash.hidden = true; }, 800);
+    if (splash) {
+      setTimeout(function () { splash.classList.add('ferme'); }, 2000);
+      setTimeout(function () { splash.hidden = true; }, 2450);
+    }
 
     FindFlow.theme.initialiser();
     FindFlow.carte.initialiser('carte');

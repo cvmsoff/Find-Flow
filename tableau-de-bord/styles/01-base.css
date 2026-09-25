@@ -62,7 +62,9 @@ html, body {
   -webkit-font-smoothing: antialiased;
 }
 a { color: var(--brand-fort); }
-h1, h2, h3 { margin: 0; font-weight: 800; letter-spacing: -0.01em; }
+/* Titres sobres : poids normal, sans espacement resserré ni effet « néon ».
+   On veut une appli qui respire, pas une affiche. */
+h1, h2, h3 { margin: 0; font-weight: 700; letter-spacing: 0; }
 
 /* ---- Boutons en pastille ---- */
 .pilule {

@@ -22,11 +22,18 @@
 </head>
 <body>
 
-  <!-- Écran de démarrage -->
+  <!-- Écran de démarrage animé : le logo de l'app apparaît, puis le logo du
+       label Cams-Lab (« un produit Cams-Lab »). -->
   <div id="splash">
-    <div class="splash-marque">Find-Flow</div>
+    <div class="splash-app">
+      <span class="splash-pastille"></span>
+      <span class="splash-nom">Find-Flow</span>
+    </div>
     <div class="splash-sous">Localisation des appareils</div>
-    <img class="splash-logo" src="logo/logo-cams-lab.svg" alt="Cams-Lab">
+    <div class="splash-par">
+      <span>un produit</span>
+      <img src="logo/logo-camslabs.png" alt="Cams-Lab">
+    </div>
   </div>
 
   <!-- La carte occupe tout l'écran, en fond. -->
@@ -96,6 +103,7 @@
       <button id="bouton-itineraire" class="pilule">Itinéraire</button>
       <button id="bouton-vol" class="pilule pilule-alerte">Signaler volé</button>
     </div>
+    <p id="route-info" class="route-info" hidden></p>
   </section>
 
   <!-- Volet : infos & réglages -->
@@ -128,7 +136,7 @@
       <div class="about-row"><div class="k">Contact</div><div class="v"><a href="mailto:cams-lab@proton.me">cams-lab@proton.me</a></div></div>
       <div class="about-row"><div class="k">Licence</div><div class="v">Usage exclusif <span id="nom-client-licence">&lt;Client&gt;</span> — © <span id="annee-licence">2026</span> Cams-Lab</div></div>
     </div>
-    <img class="about-logo" src="logo/logo-cams-lab.svg" alt="Cams-Lab">
+    <img class="about-logo" src="logo/logo-camslabs.png" alt="Cams-Lab">
   </aside>
 
   <!-- Fenêtre : ajouter un appareil -->
