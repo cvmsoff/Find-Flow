@@ -52,7 +52,16 @@ body { background: var(--bg); }
 .m-ecran::-webkit-scrollbar { display: none; }
 /* L'écran carte ne défile pas : la carte le remplit. */
 .m-ecran.plein { overflow: hidden; padding: 0; position: relative; }
-.m-ecran.plein #carte { position: absolute; inset: 0; background: #e8eaed; }
+/* La carte reste SOUS l'en-tête et la barre du bas. Leaflet donne à ses
+   couches internes des z-index très hauts (jusqu'à ~700) ; sans stacking
+   context ici, ils débordaient et recouvraient l'en-tête (z-index 30) et la
+   barre (40) — visibles quand même parce qu'on cliquait « à travers ». Le
+   z-index:0 enferme tout Leaflet dans le plan de la carte, sous les barres. */
+.m-ecran.plein #carte { position: absolute; inset: 0; z-index: 0; background: #e8eaed; }
+/* Les commandes Leaflet (zoom, attribution) se rangent SOUS l'en-tête flottant
+   et AU-DESSUS de la barre du bas, pour rester atteignables. */
+.m-ecran.plein .leaflet-top { top: calc(env(safe-area-inset-top) + 70px); }
+.m-ecran.plein .leaflet-bottom { bottom: calc(84px + env(safe-area-inset-bottom)); }
 #carte-hors-ligne { position: absolute; top: calc(env(safe-area-inset-top) + 82px); left: 50%;
   transform: translateX(-50%); z-index: 12; background: #fff7ed; color: var(--warn);
   border: 1px solid #f2c88a; border-radius: 999px; padding: 7px 14px; font-size: 12.5px; }
