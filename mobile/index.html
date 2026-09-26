@@ -28,6 +28,7 @@
         <div class="m-tete-titre" id="tete-titre">Carte</div>
         <div class="m-tete-sous" id="tete-sous"><span id="nom-client">&lt;Client&gt;</span></div>
       </div>
+      <span class="m-suivi-voyant" id="suivi-voyant" hidden title="Cet appareil envoie sa position">● Suivi</span>
       <button class="m-rond" id="btn-theme" aria-label="Clair / sombre">
         <svg class="ico-soleil" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.4 1.4M17.6 17.6 19 19M19 5l-1.4 1.4M6.4 17.6 5 19" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
         <svg class="ico-lune" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
@@ -62,6 +63,8 @@
 
       <!-- PLUS -->
       <section class="m-ecran" id="ec-plus">
+        <div class="m-titre">Cet appareil</div>
+        <button class="plus-item" id="plus-suivi"><span>Suivre cet appareil</span><span id="plus-suivi-val">Inactif</span></button>
         <div class="m-titre">Réglages</div>
         <button class="plus-item" id="plus-carte"><span>Fond de carte</span><span id="plus-carte-val">Plan</span></button>
         <button class="plus-item" id="plus-avance"><span>Configuration technique</span><span>›</span></button>

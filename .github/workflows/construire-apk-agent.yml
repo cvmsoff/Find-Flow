@@ -15,7 +15,7 @@ on:
       - 'agent/**'
       - 'tableau-de-bord/scripts/08-stockage-firebase.js'
       - 'outils/preparer-agent.js'
-      - 'outils/ajouter-permissions-agent.js'
+      - 'outils/ajouter-permissions-localisation.js'
       - 'capacitor.config.agent.json'
       - '.github/workflows/construire-apk-agent.yml'
 
@@ -56,7 +56,7 @@ jobs:
         run: npx cap add android
 
       - name: Ajouter les permissions de localisation
-        run: node outils/ajouter-permissions-agent.js
+        run: node outils/ajouter-permissions-localisation.js
 
       - name: Synchroniser l'app dans le projet Android
         run: npx cap sync android

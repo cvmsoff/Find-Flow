@@ -203,6 +203,12 @@ body { background: var(--bg); }
 .splash-par img { height: 22px; }
 :root[data-theme="dark"] .splash-par img { filter: brightness(0) invert(1); opacity: .9; }
 
+/* Voyant « cet appareil est suivi » — visible en permanence dans l'en-tête :
+   on ne suit jamais un appareil sans que ça se voie. */
+.m-suivi-voyant { flex-shrink: 0; font-size: 11px; font-weight: 800; letter-spacing: .02em;
+  color: #fff; background: var(--brand); border-radius: 999px; padding: 5px 10px; }
+.suivi-actif { color: var(--brand); font-weight: 800; margin: 4px 0 12px; }
+
 /* Code d'appairage dans la feuille */
 .code-appairage { font-size: 28px; font-weight: 900; letter-spacing: .16em; text-align: center;
   background: var(--surface-2); border: 1px dashed var(--border); border-radius: 14px; padding: 16px; margin: 6px 0 12px; }

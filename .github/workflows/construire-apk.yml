@@ -38,6 +38,9 @@ jobs:
       - name: Installer les dépendances
         run: npm install
 
+      - name: Ajouter le plugin de localisation (GPS natif)
+        run: npm install @capacitor/geolocation@^6
+
       - name: Recopier les bibliothèques (vendor)
         run: npm run sync-vendor
 
@@ -46,6 +49,9 @@ jobs:
 
       - name: Créer le projet Android
         run: npx cap add android
+
+      - name: Ajouter les permissions de localisation
+        run: node outils/ajouter-permissions-localisation.js
 
       - name: Synchroniser l'app dans le projet Android
         run: npx cap sync android

@@ -1,8 +1,10 @@
 'use strict';
 
-/* Ajoute les permissions de LOCALISATION au manifeste Android de l'agent.
-   Capacitor ne les met pas d'office ; sans elles, Android refuse le GPS.
-   On les insère juste après la balise <manifest …>, une seule fois.
+/* Ajoute les permissions de LOCALISATION au manifeste Android.
+   Sert aux DEUX applications qui envoient une position : l'app mobile
+   tout-en-un (qui peut suivre l'appareil sur lequel elle tourne) et l'agent.
+   Capacitor ne met pas ces permissions d'office ; sans elles, Android refuse
+   le GPS. On les insère juste après la balise <manifest …>, une seule fois.
    (Le suivi écran éteint / en arrière-plan viendra plus tard : il demande une
    permission supplémentaire et un service de premier plan.) */
 

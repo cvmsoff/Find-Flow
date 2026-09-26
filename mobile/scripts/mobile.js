@@ -26,6 +26,8 @@ var FindFlow = window.FindFlow || (window.FindFlow = {});
     brancherFiltres();
     brancherPlus();
     majStyleCarte();
+    majSuivi();
+    reprendreSuivi();
 
     FindFlow.stockage.ecouter(function (appareils) {
       etat = appareils;
@@ -257,8 +259,88 @@ var FindFlow = window.FindFlow || (window.FindFlow = {});
   }
 
   function brancherPlus() {
+    lier('plus-suivi', ouvrirSuivi);
     lier('plus-carte', function () { FindFlow.carte.basculerStyle(); majStyleCarte(); });
     lier('plus-avance', ouvrirConfig);
+  }
+
+  /* ═══════ Suivre CET appareil (agent intégré) ═══════
+     La même app peut ENVOYER sa propre position au compte, en plus d'afficher
+     la flotte. On ne le fait que pour un appareil qu'on possède : un voyant
+     « Suivi » reste visible dans l'en-tête tant que ça tourne, et un bouton
+     l'arrête à tout moment — on ne suit rien en cachette. */
+  let arretSuivi = null; // fonction rendue par suivreCetAppareil ; null = inactif
+
+  function suiviDemande() { try { return window.localStorage.getItem('findflow.suivi') === '1'; } catch (e) { return false; } }
+  function nomSuivi() { try { return window.localStorage.getItem('findflow.suivi.nom') || ''; } catch (e) { return ''; } }
+
+  function majSuivi() {
+    poser('plus-suivi-val', arretSuivi ? 'Actif' : 'Inactif');
+    const v = document.getElementById('suivi-voyant');
+    if (v) v.hidden = !arretSuivi;
+  }
+
+  function lancerSuivi(nom) {
+    /* Sans serveur relié (mode démonstration), il n'y a pas de compte où
+       envoyer la position : on ne prétend pas suivre. */
+    if (!FindFlow.stockage.suivreCetAppareil) return false;
+    try { window.localStorage.setItem('findflow.suivi', '1'); window.localStorage.setItem('findflow.suivi.nom', nom); } catch (e) {}
+    arretSuivi = FindFlow.stockage.suivreCetAppareil({ nom: nom, type: 'telephone' }, montrerEtatSuivi);
+    majSuivi();
+    return true;
+  }
+
+  function stopperSuivi() {
+    if (arretSuivi) { try { arretSuivi(); } catch (e) {} arretSuivi = null; }
+    try { window.localStorage.setItem('findflow.suivi', '0'); } catch (e) {}
+    majSuivi();
+  }
+
+  /* Au démarrage, si le suivi était activé, on le reprend tout seul : un
+     téléphone anti-vol doit se remettre à rapporter après un redémarrage. */
+  function reprendreSuivi() {
+    if (suiviDemande() && FindFlow.stockage.suivreCetAppareil) lancerSuivi(nomSuivi() || 'Mon appareil');
+  }
+
+  function montrerEtatSuivi(pos) {
+    const el = document.getElementById('suivi-etat');
+    if (!el) return;
+    if (pos && pos.erreur) { el.textContent = 'Position indisponible : ' + pos.erreur; return; }
+    if (pos && typeof pos.lat === 'number')
+      el.textContent = 'Position envoyée : ' + pos.lat.toFixed(5) + ', ' + pos.lng.toFixed(5) + ' · ' + FindFlow.format.dateHeure(new Date().toISOString());
+  }
+
+  function ouvrirSuivi() {
+    const f = document.getElementById('feuille');
+    /* Pas de compte relié : on explique où le faire, sans faux bouton. */
+    if (!FindFlow.stockage.suivreCetAppareil) {
+      f.innerHTML = '<div class="m-poignee"></div>' +
+        '<div class="m-fe-nom" style="margin-bottom:8px">Suivre cet appareil</div>' +
+        '<p class="aide">Le suivi envoie la position de CE téléphone à ton compte, pour le retrouver sur tous tes écrans. ' +
+        'Relie d’abord l’app à ton compte : <b>Plus → Configuration technique → Configuration Firebase</b>.</p>';
+      ouvrirVoile();
+      return;
+    }
+    const actif = !!arretSuivi;
+    f.innerHTML = '<div class="m-poignee"></div>' +
+      '<div class="m-fe-nom" style="margin-bottom:8px">Suivre cet appareil</div>' +
+      '<p class="aide">Cet appareil enverra sa position à ton compte et apparaîtra sur la carte, sur tous tes écrans. ' +
+      'À réserver à un appareil que tu possèdes : un voyant « Suivi » reste visible tant que ça tourne.</p>' +
+      '<label class="champ">Nom affiché<input id="suivi-nom" type="text" placeholder="Ex : Mon téléphone"></label>' +
+      (actif
+        ? '<div class="suivi-actif">● Suivi en cours</div>' +
+          '<button class="pilule pilule-alerte pilule-large" id="suivi-stop">Arrêter le suivi</button>'
+        : '<button class="pilule pilule-principale pilule-large" id="suivi-go">Démarrer le suivi</button>') +
+      '<p id="suivi-etat" class="aide"></p>';
+    const champ = document.getElementById('suivi-nom');
+    if (champ) champ.value = nomSuivi();
+    lier('suivi-go', function () {
+      const n = ((document.getElementById('suivi-nom') || {}).value || '').trim() || 'Mon appareil';
+      lancerSuivi(n);
+      ouvrirSuivi(); // on redessine la feuille en mode « actif »
+    });
+    lier('suivi-stop', function () { stopperSuivi(); ouvrirSuivi(); });
+    ouvrirVoile();
   }
   function majStyleCarte() { poser('plus-carte-val', FindFlow.carte.styleActuel() === 'satellite' ? 'Satellite' : 'Plan'); }
 
